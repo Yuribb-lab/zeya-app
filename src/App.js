@@ -20,7 +20,7 @@ const TELEGRAM_CONFIG = {
 // After Payment → Don't show confirmation page → 
 // Redirect URL: https://yoursite.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // TEST LINK
+  'Soft Love': 'https://buy.stripe.com/5kQ3cv6YNbSf1axcsa8so02',
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
@@ -157,7 +157,7 @@ const PrivacyModal = ({ isOpen, onClose }) => {
 
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Contact Us</h3>
-            <p>If you have questions about this Privacy Policy, contact us at support@zeya.com</p>
+            <p>If you have questions about this Privacy Policy, contact us at zeyasupport@zeyalove.com</p>
             <p className="text-xs text-gray-500 mt-2">Last Updated: December 2024</p>
           </section>
         </div>
@@ -219,7 +219,7 @@ const TermsModal = ({ isOpen, onClose }) => {
 
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Contact Us</h3>
-            <p>For questions about these Terms, contact us at support@zeya.com</p>
+            <p>For questions about these Terms, contact us at zeyasupport@zeyalove.com</p>
             <p className="text-xs text-gray-500 mt-2">Last Updated: December 2024</p>
           </section>
         </div>
@@ -260,7 +260,7 @@ const SupportModal = ({ isOpen, onClose }) => {
               <div className="space-y-2">
                 <div>
                   <span className="font-medium text-gray-700">Contact us:</span>
-                  <p className="text-blue-600">support@zeya.com</p>
+                  <p className="text-blue-600">zeyasupport@zeyalove.com</p>
                 </div>
                 <div className="text-sm text-gray-600">
                   <p>For all inquiries including:</p>
@@ -330,7 +330,7 @@ const SupportModal = ({ isOpen, onClose }) => {
             </div>
             <p className="text-red-700 text-sm mt-1">
               For immediate safety concerns, contact local authorities first. 
-              For platform safety issues, reach us immediately at support@zeya.com or @ZeyaSupport
+              For platform safety issues, reach us immediately at zeyasupport@zeyalove.com or @ZeyaSupport
             </p>
           </div>
         </div>
@@ -471,8 +471,7 @@ const ZeyaApp = () => {
     {
       name: 'Soft Love',
       price: 149,
-      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection'],
-      isTest: true
+      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection']
     },
     {
       name: 'Romantic',
@@ -973,14 +972,6 @@ const ZeyaApp = () => {
                   ? 'ring-4 ring-rose-300 bg-gradient-to-br from-rose-50 to-pink-50 transform scale-105' 
                   : 'bg-white/90 backdrop-blur-lg hover:bg-rose-50/50'
               } border border-rose-100 relative`}>
-                
-                {plan.isTest && (
-                  <div className="absolute -top-3 -right-3">
-                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      TEST MODE 🧪
-                    </span>
-                  </div>
-                )}
 
                 <div className="text-center mb-8">
                   <Heart className={`h-10 w-10 mx-auto mb-4 ${index === 2 ? 'text-rose-500 fill-rose-500' : 'text-rose-400'}`} />
@@ -1014,7 +1005,7 @@ const ZeyaApp = () => {
                       : 'bg-gray-100 text-gray-800 hover:bg-gradient-to-r hover:from-rose-400 hover:to-pink-400 hover:text-white'
                   }`}
                 >
-                  {plan.isTest ? 'Test This Plan 🧪' : 'Choose This Plan ✨'}
+                  Choose This Plan ✨
                 </button>
               </div>
             ))}
@@ -1098,7 +1089,6 @@ const ZeyaApp = () => {
             <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-6 rounded-2xl mb-8 border border-rose-100">
               <h3 className="text-lg font-bold text-rose-800 mb-2">
                 ✨ Your Active {selectedPlan.name} Plan
-                {selectedPlan.name === 'Soft Love' && <span className="text-blue-600 ml-2">🧪 (Test Mode)</span>}
               </h3>
               <p className="text-rose-600">Monthly subscription: ${selectedPlan.price}</p>
               <p className="text-sm text-rose-700 mt-2">🎯 Compatibility Score: 95%+ • Perfect Match Guaranteed</p>
