@@ -365,6 +365,10 @@ const ZeyaApp = () => {
     personalityType: '',
     dailySchedule: '',
     interests: [],
+    emotionalSupportStyle: '',
+    stressReliefStyle: '',
+    emotionalOpenness: '',
+    idealRelationshipStyle: '',
     stressHandling: '',
     supportStyle: '',
     relationshipValues: [],
@@ -515,6 +519,11 @@ const ZeyaApp = () => {
 ⏰ *Daily Schedule:* ${customerData.dailySchedule || 'N/A'}
 🎯 *Interests:* ${customerData.interests?.join(', ') || 'N/A'}
 
+💖 *Emotional Support:* ${customerData.emotionalSupportStyle || 'N/A'}
+🌸 *Stress Relief:* ${customerData.stressReliefStyle || 'N/A'}
+💕 *Emotional Openness:* ${customerData.emotionalOpenness || 'N/A'}
+👥 *Ideal Relationship:* ${customerData.idealRelationshipStyle || 'N/A'}
+
 ⏰ *Registration Time:* ${new Date().toLocaleString('en-US')}
 🌐 *Website:* https://zeyalove.com
       `.trim();
@@ -560,6 +569,10 @@ const ZeyaApp = () => {
         personality_type: customerData.personalityType || 'Not specified',
         daily_schedule: customerData.dailySchedule || 'Not specified',
         interests: customerData.interests?.join(', ') || 'Not specified',
+        emotional_support_style: customerData.emotionalSupportStyle || 'Not specified',
+        stress_relief_style: customerData.stressReliefStyle || 'Not specified',
+        emotional_openness: customerData.emotionalOpenness || 'Not specified',
+        ideal_relationship_style: customerData.idealRelationshipStyle || 'Not specified',
         selected_plan: customerData.selectedPlan?.name || 'Not specified',
         plan_price: customerData.selectedPlan?.price || 'Not specified',
         submission_time: new Date().toLocaleString()
@@ -819,9 +832,9 @@ const ZeyaApp = () => {
         <div className="max-w-4xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 max-h-[90vh] overflow-y-auto border border-rose-200">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-4">
-              Advanced Compatibility Analysis, {surveyData.name} 🧠
+              Deep Emotional Compatibility Analysis, {surveyData.name} 🧠
             </h2>
-            <p className="text-gray-600">Our AI needs deeper insights to calculate your perfect compatibility match with 95% accuracy</p>
+            <p className="text-gray-600">Our advanced AI analyzes your emotional patterns and relationship preferences to find your perfect soulmate match with 95% precision</p>
           </div>
           
           <div className="space-y-8">
@@ -900,6 +913,84 @@ const ZeyaApp = () => {
               </div>
             </div>
 
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100">
+              <h3 className="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
+                <Heart className="h-5 w-5 mr-2" />
+                Your Emotional Compass
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you prefer emotional support?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.emotionalSupportStyle}
+                    onChange={(e) => handleSecureInputChange('emotionalSupportStyle', e.target.value)}
+                  >
+                    <option value="">Choose your support style...</option>
+                    <option value="warm-empathy">🤗 Warm comfort & empathy</option>
+                    <option value="practical-advice">💡 Practical advice & solutions</option>
+                    <option value="quiet-listening">👂 Quiet listening & presence</option>
+                    <option value="humor-energy">🌈 Humor & positive energy</option>
+                    <option value="companionship">🤝 Simply being there together</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you heal from stress?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.stressReliefStyle}
+                    onChange={(e) => handleSecureInputChange('stressReliefStyle', e.target.value)}
+                  >
+                    <option value="">Your healing method...</option>
+                    <option value="alone-time">🛋️ Alone time to recharge</option>
+                    <option value="social-connection">👫 Talking with people</option>
+                    <option value="physical-activity">🏃‍♀️ Exercise & movement</option>
+                    <option value="mindful-arts">🧘‍♀️ Meditation, music, arts</option>
+                    <option value="new-environment">🎪 New places & experiences</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-2xl border border-pink-100">
+              <h3 className="text-lg font-semibold text-pink-800 mb-4 flex items-center">
+                <Users className="h-5 w-5 mr-2" />
+                Your Heart's Desires
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How quickly do you open your heart?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.emotionalOpenness}
+                    onChange={(e) => handleSecureInputChange('emotionalOpenness', e.target.value)}
+                  >
+                    <option value="">Your emotional timing...</option>
+                    <option value="immediate">🌅 Naturally open from the start</option>
+                    <option value="few-days">🌤️ After a few days of chatting</option>
+                    <option value="few-weeks">🌙 After weeks of building trust</option>
+                    <option value="few-months">🌌 Slowly over several months</option>
+                    <option value="situational">🎭 Depends on the feeling & situation</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your ideal relationship dynamic?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.idealRelationshipStyle}
+                    onChange={(e) => handleSecureInputChange('idealRelationshipStyle', e.target.value)}
+                  >
+                    <option value="">Your perfect connection...</option>
+                    <option value="devoted-priority">👑 Being each other's top priority</option>
+                    <option value="growth-partnership">🌱 Growing & evolving together</option>
+                    <option value="stable-comfort">🏠 Comfortable, stable daily sharing</option>
+                    <option value="passionate-romantic">🎭 Passionate & deeply romantic</option>
+                    <option value="independent-support">🤝 Independent yet supportive</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-2xl border border-orange-100">
               <h3 className="text-lg font-semibold text-orange-800 mb-4 flex items-center">
                 <Sparkles className="h-5 w-5 mr-2" />
@@ -942,7 +1033,7 @@ const ZeyaApp = () => {
                 disabled={loading}
                 className="flex-1 bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {loading ? 'AI Processing Your Profile...' : 'Complete AI Matching 🎯'}
+                {loading ? 'AI Processing Your Emotional Profile...' : 'Complete Soulmate Matching 💕'}
               </button>
             </div>
           </div>
