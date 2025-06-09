@@ -9,7 +9,7 @@ const TELEGRAM_CONFIG = {
 
 // Stripe Payment Links (Production)
 const stripePaymentLinks = {
-  'Soft Love': 'hhttps://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
+  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
