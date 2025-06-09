@@ -7,7 +7,10 @@ const TELEGRAM_CONFIG = {
   chatId: 6447858148
 };
 
-// Stripe Payment Links (Production)
+// 🚀 LIVE Stripe Payment Links for zeyalove.com
+// ⚠️ IMPORTANT: Configure in Stripe Dashboard:
+// Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
+// (Cancel URL is not needed - Stripe handles this automatically)
 const stripePaymentLinks = {
   'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
@@ -357,21 +360,41 @@ const ZeyaApp = () => {
   // 🔍 Enhanced payment detection with automatic redirect handling
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const currentURL = window.location.href;
     
-    // Check for Stripe-specific parameters
+    // Collect all URL parameters for debugging
+    const allParams = Object.fromEntries(urlParams.entries());
+    
+    // Check for ALL possible Stripe parameters
     const sessionId = urlParams.get('session_id');
     const paymentSuccess = urlParams.get('payment_success');
     const paymentIntent = urlParams.get('payment_intent');
+    const paymentIntentClientSecret = urlParams.get('payment_intent_client_secret');
     const checkoutSessionId = urlParams.get('checkout_session_id');
     const success = urlParams.get('success');
+    const redirectStatus = urlParams.get('redirect_status');
     
     // Enhanced payment success detection
     const isPaymentSuccess = sessionId || paymentIntent || checkoutSessionId || 
-                            paymentSuccess === 'true' || success === 'true';
+                            paymentSuccess === 'true' || success === 'true' ||
+                            redirectStatus === 'succeeded';
     
-    console.log('🎯 Payment Detection:', {
-      sessionId, paymentSuccess, paymentIntent, isPaymentSuccess
+    console.log('🎯 COMPLETE Payment Detection:', {
+      currentURL,
+      allParams,
+      sessionId, 
+      paymentSuccess, 
+      paymentIntent,
+      paymentIntentClientSecret,
+      checkoutSessionId,
+      success,
+      redirectStatus,
+      isPaymentSuccess
     });
+    
+    // Always log localStorage content
+    const savedData = localStorage.getItem('zeyaOrderData');
+    console.log('💾 LocalStorage content:', savedData);
     
     if (isPaymentSuccess) {
       console.log('💳 Payment success detected, restoring data...');
@@ -674,11 +697,18 @@ const ZeyaApp = () => {
     // Stripe 결제로 리다이렉트
     const stripeUrl = stripePaymentLinks[planName];
     
+    console.log('🔗 Available Stripe Links:', stripePaymentLinks);
+    console.log(`🎯 Selected plan: ${planName}`);
+    console.log(`💳 Stripe URL for ${planName}:`, stripeUrl);
+    
     if (stripeUrl) {
-      console.log(`🎯 Redirecting to ${planName} payment: ${stripeUrl}`);
+      console.log(`🚀 Redirecting to ${planName} payment...`);
+      console.log(`📍 Full redirect URL: ${stripeUrl}`);
+      
       window.location.href = stripeUrl;
     } else {
-      alert('Payment link not found for this plan. Please contact support.');
+      console.error('❌ No Stripe URL found for plan:', planName);
+      alert(`⚠️ Payment link for ${planName} is not configured yet. Please contact support at zeyasupport@zeyalove.com`);
     }
   };
 
