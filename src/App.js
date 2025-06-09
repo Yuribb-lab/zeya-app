@@ -9,9 +9,9 @@ const EMAILJS_CONFIG = {
   publicKey: 'tm5FWkK5QT0tMftOh'
 };
 
-// Stripe Payment Links - LIVE MODE
+// Stripe Payment Links - TEST MODE for Soft Love, LIVE for others
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/5kQ3cv6YNbSf1axcsa8so02',
+  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // TEST LINK
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
@@ -367,81 +367,44 @@ const ZeyaApp = () => {
     supportNeeds: ''
   });
 
-  // 💡 NEW: 결제 상태 확인 및 복원 useEffect
+  // 🎯 SIMPLIFIED: URL 파라미터로만 결제 상태 확인
   useEffect(() => {
-    const checkPaymentStatus = () => {
-      // URL 파라미터 확인
-      const urlParams = new URLSearchParams(window.location.search);
-      const paymentSuccess = urlParams.get('payment_success');
-      const paymentCanceled = urlParams.get('payment_canceled');
-      
-      // localStorage에서 결제 데이터 확인
-      const paymentDataStr = localStorage.getItem('zeyaPaymentData');
-      
-      if (paymentSuccess === 'true') {
-        // URL 파라미터로 성공 확인된 경우
-        if (paymentDataStr) {
-          const paymentData = JSON.parse(paymentDataStr);
-          setSelectedPlan(paymentData.selectedPlan);
-          setSurveyData(paymentData.surveyData);
-          localStorage.removeItem('zeyaPaymentData');
-        }
-        setShowSurvey(false);
-        setShowDetailedSurvey(false);
-        setShowPlanSelection(false);
-        setShowThankYou(true);
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } else if (paymentCanceled === 'true') {
-        // 결제 취소된 경우
-        if (paymentDataStr) {
-          const paymentData = JSON.parse(paymentDataStr);
-          setSelectedPlan(paymentData.selectedPlan);
-          setSurveyData(paymentData.surveyData);
-          setShowPlanSelection(true);
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } else if (paymentDataStr) {
-        // localStorage에 결제 진행 중인 데이터가 있는 경우
-        const paymentData = JSON.parse(paymentDataStr);
-        const timeDiff = Date.now() - paymentData.timestamp;
-        
-        // 5분 이상 지났고 결제 진행 중이었다면 사용자에게 확인
-        if (timeDiff > 300000 && paymentData.paymentInProgress) { // 5분 = 300000ms
-          const userConfirm = window.confirm(
-            '결제가 진행 중이었습니다. 결제가 완료되셨나요?\n\n' +
-            '✅ 완료: "확인" 클릭\n' +
-            '❌ 미완료: "취소" 클릭'
-          );
-          
-          if (userConfirm) {
-            // 사용자가 결제 완료를 확인한 경우
-            setSelectedPlan(paymentData.selectedPlan);
-            setSurveyData(paymentData.surveyData);
-            setShowSurvey(false);
-            setShowDetailedSurvey(false);
-            setShowPlanSelection(false);
-            setShowThankYou(true);
-            localStorage.removeItem('zeyaPaymentData');
-          } else {
-            // 사용자가 결제 미완료라고 한 경우
-            setSelectedPlan(paymentData.selectedPlan);
-            setSurveyData(paymentData.surveyData);
-            setShowPlanSelection(true);
-            // localStorage는 유지 (다시 결제할 수 있도록)
-          }
-        } else if (timeDiff < 300000) {
-          // 5분 이내라면 데이터 복원하고 플랜 선택 페이지 유지
-          setSelectedPlan(paymentData.selectedPlan);
-          setSurveyData(paymentData.surveyData);
-          setShowPlanSelection(true);
-        }
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentSuccess = urlParams.get('payment_success');
+    const paymentCanceled = urlParams.get('payment_canceled');
+    
+    if (paymentSuccess === 'true') {
+      // 결제 성공 - localStorage에서 데이터 복원
+      const savedData = localStorage.getItem('zeyaOrderData');
+      if (savedData) {
+        const orderData = JSON.parse(savedData);
+        setSelectedPlan(orderData.selectedPlan);
+        setSurveyData(orderData.surveyData);
+        localStorage.removeItem('zeyaOrderData');
       }
-    };
-
-    checkPaymentStatus();
+      
+      setShowSurvey(false);
+      setShowDetailedSurvey(false);
+      setShowPlanSelection(false);
+      setShowThankYou(true);
+      
+      // URL 파라미터 제거
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentCanceled === 'true') {
+      // 결제 취소 - 플랜 선택 페이지로
+      const savedData = localStorage.getItem('zeyaOrderData');
+      if (savedData) {
+        const orderData = JSON.parse(savedData);
+        setSelectedPlan(orderData.selectedPlan);
+        setSurveyData(orderData.surveyData);
+      }
+      
+      setShowPlanSelection(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
-  // Send email when thank you page is shown and payment successful
+  // Send email when thank you page is shown
   useEffect(() => {
     const sendEmail = async () => {
       if (showThankYou && selectedPlan && surveyData.name && !emailSent) {
@@ -471,7 +434,8 @@ const ZeyaApp = () => {
     {
       name: 'Soft Love',
       price: 149,
-      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection']
+      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection'],
+      isTest: true // 🧪 테스트 플랜 표시
     },
     {
       name: 'Romantic',
@@ -575,43 +539,28 @@ const ZeyaApp = () => {
     setShowPlanSelection(true);
   };
 
-  // 💡 NEW: 업데이트된 결제 처리 함수
+  // 🚀 SIMPLIFIED: 간단한 결제 처리
   const handlePayment = (planName, price) => {
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
     
-    // 결제 전에 모든 데이터를 localStorage에 저장
-    const paymentData = {
+    // 주문 데이터를 localStorage에 저장 (간단하게)
+    const orderData = {
       selectedPlan: selectedPlanData,
       surveyData: surveyData,
-      timestamp: Date.now(),
-      paymentInProgress: true
+      timestamp: Date.now()
     };
     
-    localStorage.setItem('zeyaPaymentData', JSON.stringify(paymentData));
+    localStorage.setItem('zeyaOrderData', JSON.stringify(orderData));
     
+    // Stripe로 바로 리다이렉트
     const stripeUrl = stripePaymentLinks[planName];
     
     if (stripeUrl) {
-      // Stripe 페이지로 이동
+      console.log(`🎯 Redirecting to ${planName} payment: ${stripeUrl}`);
       window.location.href = stripeUrl;
     } else {
       alert('Payment link not found for this plan. Please contact support.');
-    }
-  };
-
-  // 💡 NEW: 수동 결제 확인 함수
-  const handleManualPaymentConfirm = () => {
-    const paymentDataStr = localStorage.getItem('zeyaPaymentData');
-    if (paymentDataStr) {
-      const paymentData = JSON.parse(paymentDataStr);
-      setSelectedPlan(paymentData.selectedPlan);
-      setSurveyData(paymentData.surveyData);
-      setShowPlanSelection(false);
-      setShowThankYou(true);
-      localStorage.removeItem('zeyaPaymentData');
-    } else {
-      alert('결제 데이터를 찾을 수 없습니다. 설문조사를 다시 시작해주세요.');
     }
   };
 
@@ -905,28 +854,23 @@ const ZeyaApp = () => {
             </p>
           </div>
 
-          {/* 💡 NEW: 결제 완료 확인 버튼 추가 */}
-          <div className="text-center mb-8">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 inline-block">
-              <p className="text-yellow-800 mb-4">
-                💡 <strong>결제를 완료하셨나요?</strong> Stripe에서 결제 후 이 페이지로 돌아오셨다면 아래 버튼을 클릭해주세요.
-              </p>
-              <button
-                onClick={handleManualPaymentConfirm}
-                className="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition-colors font-medium"
-              >
-                ✅ 결제 완료했습니다
-              </button>
-            </div>
-          </div>
-
           <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 gap-8 mb-12">
             {plans.map((plan, index) => (
               <div key={index} className={`rounded-3xl p-8 shadow-2xl transition-all duration-500 hover:shadow-3xl hover:-translate-y-3 ${
                 index === 2 
                   ? 'ring-4 ring-rose-300 bg-gradient-to-br from-rose-50 to-pink-50 transform scale-105' 
                   : 'bg-white/90 backdrop-blur-lg hover:bg-rose-50/50'
-              } border border-rose-100`}>
+              } border border-rose-100 relative`}>
+                
+                {/* 🧪 테스트 플랜 표시 */}
+                {plan.isTest && (
+                  <div className="absolute -top-3 -right-3">
+                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      TEST MODE 🧪
+                    </span>
+                  </div>
+                )}
+
                 <div className="text-center mb-8">
                   <Heart className={`h-10 w-10 mx-auto mb-4 ${index === 2 ? 'text-rose-500 fill-rose-500' : 'text-rose-400'}`} />
                   <h3 className="text-2xl font-bold text-gray-800 mb-3">{plan.name}</h3>
@@ -959,7 +903,7 @@ const ZeyaApp = () => {
                       : 'bg-gray-100 text-gray-800 hover:bg-gradient-to-r hover:from-rose-400 hover:to-pink-400 hover:text-white'
                   }`}
                 >
-                  Choose This Plan ✨
+                  {plan.isTest ? 'Test This Plan 🧪' : 'Choose This Plan ✨'}
                 </button>
               </div>
             ))}
@@ -1029,7 +973,10 @@ const ZeyaApp = () => {
 
           {selectedPlan && (
             <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-6 rounded-2xl mb-8 border border-rose-100">
-              <h3 className="text-lg font-bold text-rose-800 mb-2">✨ Your Active {selectedPlan.name} Plan</h3>
+              <h3 className="text-lg font-bold text-rose-800 mb-2">
+                ✨ Your Active {selectedPlan.name} Plan
+                {selectedPlan.name === 'Soft Love' && <span className="text-blue-600 ml-2">🧪 (Test Mode)</span>}
+              </h3>
               <p className="text-rose-600">Monthly subscription: ${selectedPlan.price}</p>
               <p className="text-sm text-rose-700 mt-2">🎯 Compatibility Score: 95%+ • Perfect Match Guaranteed</p>
             </div>
@@ -1056,8 +1003,7 @@ const ZeyaApp = () => {
               setSelectedPlan(null);
               setEmailSent(false);
               setEmailSending(false);
-              // localStorage 정리
-              localStorage.removeItem('zeyaPaymentData');
+              localStorage.removeItem('zeyaOrderData');
             }}
             className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-10 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium text-lg"
           >
