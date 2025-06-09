@@ -353,7 +353,7 @@ const ZeyaApp = () => {
   const [showPlanSelection, setShowPlanSelection] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [customerNotificationStatus, setCustomerNotificationStatus] = useState('pending'); // pending, sending, sent, error
+  const [showDataRecovery, setShowDataRecovery] = useState(false);
 
   const [surveyData, setSurveyData] = useState({
     name: '',
@@ -459,16 +459,23 @@ const ZeyaApp = () => {
         
         localStorage.removeItem('zeyaOrderData');
         console.log('🗑️ Cleaned up order data');
+        
+        // Navigate to thank you page
+        setShowSurvey(false);
+        setShowDetailedSurvey(false);
+        setShowPlanSelection(false);
+        setShowThankYou(true);
       } else {
         console.warn('⚠️ No saved order data found in localStorage!');
-        alert('Payment detected but no order data found. Please contact support with your payment confirmation.');
+        console.log('🔄 Showing data recovery screen...');
+        
+        // Show data recovery screen instead of alert
+        setShowDataRecovery(true);
+        setShowSurvey(false);
+        setShowDetailedSurvey(false);
+        setShowPlanSelection(false);
+        setShowThankYou(false);
       }
-      
-      // Navigate to thank you page
-      setShowSurvey(false);
-      setShowDetailedSurvey(false);
-      setShowPlanSelection(false);
-      setShowThankYou(true);
       
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -779,7 +786,149 @@ const ZeyaApp = () => {
     }
   };
 
-  // Survey Component
+  // Data Recovery Component
+  if (showDataRecovery) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-100 via-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 border border-green-200">
+          <div className="text-center mb-8">
+            <div className="text-6xl mb-4">✅</div>
+            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600 mb-4">
+              Payment Successful! 🎉
+            </h2>
+            <p className="text-gray-600 mb-6">
+              We detected your successful payment, but need to collect your information to complete your companion matching.
+            </p>
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6">
+              <p className="text-blue-800 font-medium">
+                📋 Please provide your basic information below to activate your subscription and receive your companion match.
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-2xl border border-green-100">
+              <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
+                <Heart className="h-5 w-5 mr-2" />
+                Quick Registration
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.name}
+                    onChange={(e) => handleSecureInputChange('name', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Age *</label>
+                  <input
+                    type="number"
+                    min="18"
+                    max="120"
+                    placeholder="Your age"
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.age}
+                    onChange={(e) => handleSecureInputChange('age', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Country/Region *</label>
+                  <select 
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.country}
+                    onChange={(e) => handleSecureInputChange('country', e.target.value)}
+                  >
+                    <option value="">Choose your country...</option>
+                    <option value="US">United States 🇺🇸</option>
+                    <option value="CA">Canada 🇨🇦</option>
+                    <option value="UK">United Kingdom 🇬🇧</option>
+                    <option value="AU">Australia 🇦🇺</option>
+                    <option value="DE">Germany 🇩🇪</option>
+                    <option value="FR">France 🇫🇷</option>
+                    <option value="JP">Japan 🇯🇵</option>
+                    <option value="SG">Singapore 🇸🇬</option>
+                    <option value="NL">Netherlands 🇳🇱</option>
+                    <option value="SE">Sweden 🇸🇪</option>
+                    <option value="NO">Norway 🇳🇴</option>
+                    <option value="OTHER">Other ✨</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Telegram Username *</label>
+                  <input
+                    type="text"
+                    placeholder="@your_username"
+                    className="w-full px-4 py-3 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.telegramUsername}
+                    onChange={(e) => handleSecureInputChange('telegramUsername', e.target.value)}
+                  />
+                  <p className="text-xs text-green-600 mt-1">Required: This is how your companion will reach you ✨</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-yellow-800">Important</h4>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    Your payment has been processed successfully. Please complete this form to receive your companion match within 12 hours.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-6">
+              <button
+                onClick={() => {
+                  setShowDataRecovery(false);
+                  setShowSurvey(true);
+                }}
+                className="flex-1 px-8 py-4 border-2 border-gray-300 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-medium"
+              >
+                Take Full Survey 📋
+              </button>
+              <button
+                onClick={() => {
+                  if (!surveyData.name || !surveyData.age || !surveyData.country || !surveyData.telegramUsername) {
+                    alert('Please fill in all required fields (marked with *)');
+                    return;
+                  }
+                  
+                  // Create recovery data with estimated plan
+                  const recoveryData = {
+                    ...surveyData,
+                    selectedPlan: { 
+                      name: 'Soft Love', // Default plan for recovery
+                      price: 149 
+                    }
+                  };
+                  
+                  console.log('🔄 Processing recovery data:', recoveryData);
+                  processCustomerNotification(recoveryData);
+                  
+                  setSelectedPlan(recoveryData.selectedPlan);
+                  setShowDataRecovery(false);
+                  setShowThankYou(true);
+                }}
+                disabled={!surveyData.name || !surveyData.age || !surveyData.country || !surveyData.telegramUsername}
+                className="flex-1 bg-gradient-to-r from-green-400 to-blue-400 text-white px-8 py-4 rounded-2xl hover:from-green-500 hover:to-blue-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                Complete Registration ✨
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (showSurvey) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 flex items-center justify-center p-4">
