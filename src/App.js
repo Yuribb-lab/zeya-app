@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, Lock, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 
 // EmailJS Configuration
@@ -11,7 +11,7 @@ const EMAILJS_CONFIG = {
 
 // Stripe Payment Links - LIVE MODE
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
+  'Soft Love': 'https://buy.stripe.com/5kQ3cv6YNbSf1axcsa8so02',
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
@@ -242,7 +242,6 @@ const SupportModal = ({ isOpen, onClose }) => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Email Support */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
               <div className="flex items-center mb-4">
                 <MessageCircle className="h-8 w-8 text-blue-600 mr-3" />
@@ -266,7 +265,6 @@ const SupportModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Telegram Support */}
             <div className="bg-gradient-to-br from-rose-50 to-pink-50 p-6 rounded-2xl border border-rose-100">
               <div className="flex items-center mb-4">
                 <Users className="h-8 w-8 text-rose-600 mr-3" />
@@ -291,7 +289,6 @@ const SupportModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Support Hours */}
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
             <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
               <Shield className="h-6 w-6 text-green-600 mr-2" />
@@ -317,7 +314,6 @@ const SupportModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Emergency Contact */}
           <div className="bg-red-50 p-4 rounded-xl border border-red-200">
             <div className="flex items-center">
               <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
@@ -336,7 +332,6 @@ const SupportModal = ({ isOpen, onClose }) => {
 
 // Main Zeya App Component
 const ZeyaApp = () => {
-  const [currentPage, setCurrentPage] = useState('home');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -372,23 +367,78 @@ const ZeyaApp = () => {
     supportNeeds: ''
   });
 
-  // Check for payment success/failure on component mount
+  // 💡 NEW: 결제 상태 확인 및 복원 useEffect
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentSuccess = urlParams.get('payment_success');
-    const paymentCanceled = urlParams.get('payment_canceled');
-    
-    if (paymentSuccess === 'true') {
-      // Payment successful - show thank you page
-      setShowPlanSelection(false);
-      setShowThankYou(true);
-      // Clear URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (paymentCanceled === 'true') {
-      // Payment canceled/failed - stay on plan selection
-      // Clear URL parameters but keep user on plan selection
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
+    const checkPaymentStatus = () => {
+      // URL 파라미터 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentSuccess = urlParams.get('payment_success');
+      const paymentCanceled = urlParams.get('payment_canceled');
+      
+      // localStorage에서 결제 데이터 확인
+      const paymentDataStr = localStorage.getItem('zeyaPaymentData');
+      
+      if (paymentSuccess === 'true') {
+        // URL 파라미터로 성공 확인된 경우
+        if (paymentDataStr) {
+          const paymentData = JSON.parse(paymentDataStr);
+          setSelectedPlan(paymentData.selectedPlan);
+          setSurveyData(paymentData.surveyData);
+          localStorage.removeItem('zeyaPaymentData');
+        }
+        setShowSurvey(false);
+        setShowDetailedSurvey(false);
+        setShowPlanSelection(false);
+        setShowThankYou(true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (paymentCanceled === 'true') {
+        // 결제 취소된 경우
+        if (paymentDataStr) {
+          const paymentData = JSON.parse(paymentDataStr);
+          setSelectedPlan(paymentData.selectedPlan);
+          setSurveyData(paymentData.surveyData);
+          setShowPlanSelection(true);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (paymentDataStr) {
+        // localStorage에 결제 진행 중인 데이터가 있는 경우
+        const paymentData = JSON.parse(paymentDataStr);
+        const timeDiff = Date.now() - paymentData.timestamp;
+        
+        // 5분 이상 지났고 결제 진행 중이었다면 사용자에게 확인
+        if (timeDiff > 300000 && paymentData.paymentInProgress) { // 5분 = 300000ms
+          const userConfirm = window.confirm(
+            '결제가 진행 중이었습니다. 결제가 완료되셨나요?\n\n' +
+            '✅ 완료: "확인" 클릭\n' +
+            '❌ 미완료: "취소" 클릭'
+          );
+          
+          if (userConfirm) {
+            // 사용자가 결제 완료를 확인한 경우
+            setSelectedPlan(paymentData.selectedPlan);
+            setSurveyData(paymentData.surveyData);
+            setShowSurvey(false);
+            setShowDetailedSurvey(false);
+            setShowPlanSelection(false);
+            setShowThankYou(true);
+            localStorage.removeItem('zeyaPaymentData');
+          } else {
+            // 사용자가 결제 미완료라고 한 경우
+            setSelectedPlan(paymentData.selectedPlan);
+            setSurveyData(paymentData.surveyData);
+            setShowPlanSelection(true);
+            // localStorage는 유지 (다시 결제할 수 있도록)
+          }
+        } else if (timeDiff < 300000) {
+          // 5분 이내라면 데이터 복원하고 플랜 선택 페이지 유지
+          setSelectedPlan(paymentData.selectedPlan);
+          setSurveyData(paymentData.surveyData);
+          setShowPlanSelection(true);
+        }
+      }
+    };
+
+    checkPaymentStatus();
   }, []);
 
   // Send email when thank you page is shown and payment successful
@@ -415,7 +465,7 @@ const ZeyaApp = () => {
     };
 
     sendEmail();
-  }, [showThankYou, selectedPlan, surveyData.name, emailSent]);
+  }, [showThankYou, selectedPlan, surveyData, emailSent]);
 
   const plans = [
     {
@@ -503,6 +553,8 @@ const ZeyaApp = () => {
           error = 'Please enter a valid Telegram username format (@username).';
         }
         break;
+      default:
+        break;
     }
 
     setErrors(prev => ({ ...prev, [field]: error }));
@@ -523,17 +575,43 @@ const ZeyaApp = () => {
     setShowPlanSelection(true);
   };
 
+  // 💡 NEW: 업데이트된 결제 처리 함수
   const handlePayment = (planName, price) => {
-    setSelectedPlan({ name: planName, price: price });
+    const selectedPlanData = { name: planName, price: price };
+    setSelectedPlan(selectedPlanData);
     
-    // Get the Stripe payment link for this plan
+    // 결제 전에 모든 데이터를 localStorage에 저장
+    const paymentData = {
+      selectedPlan: selectedPlanData,
+      surveyData: surveyData,
+      timestamp: Date.now(),
+      paymentInProgress: true
+    };
+    
+    localStorage.setItem('zeyaPaymentData', JSON.stringify(paymentData));
+    
     const stripeUrl = stripePaymentLinks[planName];
     
     if (stripeUrl) {
-      // Open Stripe payment page in new tab
-      window.open(stripeUrl, '_blank');
+      // Stripe 페이지로 이동
+      window.location.href = stripeUrl;
     } else {
       alert('Payment link not found for this plan. Please contact support.');
+    }
+  };
+
+  // 💡 NEW: 수동 결제 확인 함수
+  const handleManualPaymentConfirm = () => {
+    const paymentDataStr = localStorage.getItem('zeyaPaymentData');
+    if (paymentDataStr) {
+      const paymentData = JSON.parse(paymentDataStr);
+      setSelectedPlan(paymentData.selectedPlan);
+      setSurveyData(paymentData.surveyData);
+      setShowPlanSelection(false);
+      setShowThankYou(true);
+      localStorage.removeItem('zeyaPaymentData');
+    } else {
+      alert('결제 데이터를 찾을 수 없습니다. 설문조사를 다시 시작해주세요.');
     }
   };
 
@@ -827,6 +905,21 @@ const ZeyaApp = () => {
             </p>
           </div>
 
+          {/* 💡 NEW: 결제 완료 확인 버튼 추가 */}
+          <div className="text-center mb-8">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 inline-block">
+              <p className="text-yellow-800 mb-4">
+                💡 <strong>결제를 완료하셨나요?</strong> Stripe에서 결제 후 이 페이지로 돌아오셨다면 아래 버튼을 클릭해주세요.
+              </p>
+              <button
+                onClick={handleManualPaymentConfirm}
+                className="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition-colors font-medium"
+              >
+                ✅ 결제 완료했습니다
+              </button>
+            </div>
+          </div>
+
           <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 gap-8 mb-12">
             {plans.map((plan, index) => (
               <div key={index} className={`rounded-3xl p-8 shadow-2xl transition-all duration-500 hover:shadow-3xl hover:-translate-y-3 ${
@@ -963,6 +1056,8 @@ const ZeyaApp = () => {
               setSelectedPlan(null);
               setEmailSent(false);
               setEmailSending(false);
+              // localStorage 정리
+              localStorage.removeItem('zeyaPaymentData');
             }}
             className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-10 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium text-lg"
           >
