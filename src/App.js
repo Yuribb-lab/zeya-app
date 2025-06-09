@@ -15,10 +15,7 @@ const TELEGRAM_CONFIG = {
   chatId: 6447858148
 };
 
-// Stripe Payment Links with automatic redirect URLs
-// ⚠️ NOTE: You need to configure these in Stripe Dashboard:
-// After Payment → Don't show confirmation page → 
-// Redirect URL: https://yoursite.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
+// Stripe Payment Links (Live Production)
 const stripePaymentLinks = {
   'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
@@ -27,7 +24,20 @@ const stripePaymentLinks = {
   'Soulmate VIP': 'https://buy.stripe.com/5kQeVdaaZ09xaL7gIq8so04'
 };
 
-// Security Utility Functions
+// Plan detection from URL parameters
+const detectPlanFromUrl = (urlParams) => {
+  const planParam = urlParams.get('plan');
+  const planMap = {
+    'soft-love': { name: 'Soft Love', price: 149 },
+    'romantic': { name: 'Romantic', price: 399 },
+    'deep-bond': { name: 'Deep Bond', price: 799 },
+    'devoted': { name: 'Devoted', price: 1299 },
+    'soulmate-vip': { name: 'Soulmate VIP', price: 1999 }
+  };
+  return planMap[planParam] || { name: 'Soft Love', price: 149 };
+};
+
+// Security Utilities
 const SecurityUtils = {
   sanitizeInput: (input) => {
     if (typeof input !== 'string') return input;
@@ -51,29 +61,6 @@ const SecurityUtils = {
       if (!telegram) return true;
       return /^@[a-zA-Z0-9_]{5,32}$/.test(telegram);
     }
-  },
-
-  rateLimiter: {
-    attempts: new Map(),
-    isAllowed: (key, maxAttempts = 5, windowMs = 900000) => {
-      const now = Date.now();
-      const attempts = SecurityUtils.rateLimiter.attempts.get(key) || [];
-      const validAttempts = attempts.filter(time => now - time < windowMs);
-      
-      if (validAttempts.length >= maxAttempts) {
-        return false;
-      }
-      
-      validAttempts.push(now);
-      SecurityUtils.rateLimiter.attempts.set(key, validAttempts);
-      return true;
-    }
-  },
-
-  generateSessionToken: () => {
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 };
 
@@ -81,15 +68,15 @@ const SecurityUtils = {
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+    return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error('Error caught:', error, errorInfo);
   }
 
   render() {
@@ -114,7 +101,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Simple Privacy Policy Modal
+// Privacy Policy Modal
 const PrivacyModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
@@ -124,37 +111,18 @@ const PrivacyModal = ({ isOpen, onClose }) => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Privacy Policy</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-              ×
-            </button>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
           </div>
         </div>
         <div className="p-6 space-y-4 text-sm text-gray-600">
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">What Information We Collect</h3>
-            <p>We collect information you provide when you sign up, including your name, age, country, communication preferences, and Telegram username. We also collect payment information through our secure payment processor.</p>
+            <p>We collect information you provide when you sign up, including your name, age, country, communication preferences, and Telegram username.</p>
           </section>
-          
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">How We Use Your Information</h3>
-            <p>We use your information to provide our companionship matching service, process payments, and communicate with you about your account. We match you with compatible companions based on your preferences.</p>
+            <p>We use your information to provide our companionship matching service and process payments.</p>
           </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Information Sharing</h3>
-            <p>We don't sell your personal information. We only share your information with your matched companions to facilitate your emotional connection experience and with service providers who help us operate our platform.</p>
-          </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Data Security</h3>
-            <p>We use industry-standard security measures to protect your personal information. All data is encrypted and stored securely.</p>
-          </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Your Rights</h3>
-            <p>You can access, update, or delete your personal information at any time. You can also opt out of communications and cancel your subscription anytime.</p>
-          </section>
-
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Contact Us</h3>
             <p>If you have questions about this Privacy Policy, contact us at zeyasupport@zeyalove.com</p>
@@ -166,7 +134,7 @@ const PrivacyModal = ({ isOpen, onClose }) => {
   );
 };
 
-// Simple Terms of Service Modal
+// Terms of Service Modal
 const TermsModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
@@ -176,47 +144,18 @@ const TermsModal = ({ isOpen, onClose }) => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Terms of Service</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-              ×
-            </button>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
           </div>
         </div>
         <div className="p-6 space-y-4 text-sm text-gray-600">
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Service Description</h3>
-            <p>Zeya provides emotional companionship services connecting users with verified companions for friendship and emotional support. Our service is 100% Safe-for-Work (SFW) with no sexual content.</p>
+            <p>Zeya provides emotional companionship services with verified companions for friendship and emotional support. 100% Safe-for-Work.</p>
           </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Eligibility</h3>
-            <p>You must be at least 18 years old to use our services. By using Zeya, you agree to provide accurate information and follow our community guidelines.</p>
-          </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Acceptable Use</h3>
-            <ul className="list-disc ml-6 space-y-1">
-              <li>Treat all companions with respect and kindness</li>
-              <li>No sexual content, harassment, or inappropriate behavior</li>
-              <li>Don't attempt to contact companions outside our platform</li>
-              <li>Don't use our service for illegal purposes</li>
-            </ul>
-          </section>
-
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Payment and Cancellation</h3>
-            <p>Our services are subscription-based with monthly billing through Stripe. You can cancel anytime with no cancellation fees. Your subscription will remain active until the end of your current billing period.</p>
+            <p>Monthly billing through Stripe. Cancel anytime with no fees.</p>
           </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Privacy</h3>
-            <p>All conversations are private and confidential. We don't monitor your conversations except as required by law.</p>
-          </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Termination</h3>
-            <p>We may terminate accounts that violate these terms. You can also close your account at any time.</p>
-          </section>
-
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Contact Us</h3>
             <p>For questions about these Terms, contact us at zeyasupport@zeyalove.com</p>
@@ -228,7 +167,7 @@ const TermsModal = ({ isOpen, onClose }) => {
   );
 };
 
-// Support Modal Component
+// Support Modal
 const SupportModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
@@ -238,9 +177,7 @@ const SupportModal = ({ isOpen, onClose }) => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Customer Support</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-              ×
-            </button>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
           </div>
         </div>
         <div className="p-6 space-y-6">
@@ -262,15 +199,6 @@ const SupportModal = ({ isOpen, onClose }) => {
                   <span className="font-medium text-gray-700">Contact us:</span>
                   <p className="text-blue-600">zeyasupport@zeyalove.com</p>
                 </div>
-                <div className="text-sm text-gray-600">
-                  <p>For all inquiries including:</p>
-                  <ul className="list-disc ml-4 mt-1">
-                    <li>Account & billing questions</li>
-                    <li>Technical support</li>
-                    <li>Companion matching</li>
-                    <li>General help</li>
-                  </ul>
-                </div>
               </div>
             </div>
 
@@ -285,53 +213,8 @@ const SupportModal = ({ isOpen, onClose }) => {
                   <span className="font-medium text-gray-700">Contact us:</span>
                   <p className="text-rose-600">@ZeyaSupport</p>
                 </div>
-                <div className="text-sm text-gray-600">
-                  <p>Best for:</p>
-                  <ul className="list-disc ml-4 mt-1">
-                    <li>Quick questions</li>
-                    <li>Urgent issues</li>
-                    <li>Real-time chat</li>
-                    <li>Community support</li>
-                  </ul>
-                </div>
               </div>
             </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
-            <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-              <Shield className="h-6 w-6 text-green-600 mr-2" />
-              Support Hours & Response Times
-            </h4>
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <h5 className="font-medium text-gray-700 mb-2">Business Hours</h5>
-                <ul className="space-y-1 text-gray-600">
-                  <li>Monday - Friday: 9:00 AM - 6:00 PM (EST)</li>
-                  <li>Saturday: 10:00 AM - 4:00 PM (EST)</li>
-                  <li>Sunday: Limited support available</li>
-                </ul>
-              </div>
-              <div>
-                <h5 className="font-medium text-gray-700 mb-2">Response Times</h5>
-                <ul className="space-y-1 text-gray-600">
-                  <li>Telegram: Usually within 30 minutes</li>
-                  <li>Email: 2-4 hours during business hours</li>
-                  <li>Urgent issues: Within 1 hour</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-red-50 p-4 rounded-xl border border-red-200">
-            <div className="flex items-center">
-              <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
-              <span className="font-medium text-red-800">Emergency or Safety Concerns</span>
-            </div>
-            <p className="text-red-700 text-sm mt-1">
-              For immediate safety concerns, contact local authorities first. 
-              For platform safety issues, reach us immediately at zeyasupport@zeyalove.com or @ZeyaSupport
-            </p>
           </div>
         </div>
       </div>
@@ -352,8 +235,9 @@ const ZeyaApp = () => {
   const [showDetailedSurvey, setShowDetailedSurvey] = useState(false);
   const [showPlanSelection, setShowPlanSelection] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
   const [showDataRecovery, setShowDataRecovery] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [notificationStatus, setNotificationStatus] = useState('pending');
 
   const [surveyData, setSurveyData] = useState({
     name: '',
@@ -368,132 +252,45 @@ const ZeyaApp = () => {
     emotionalSupportStyle: '',
     stressReliefStyle: '',
     emotionalOpenness: '',
-    idealRelationshipStyle: '',
-    stressHandling: '',
-    supportStyle: '',
-    relationshipValues: [],
-    freeTimeStyle: '',
-    communicationFrequency: '',
-    emotionalOpenTime: '',
-    currentGoals: '',
-    supportNeeds: ''
+    idealRelationshipStyle: ''
   });
 
-  // 🔍 Enhanced payment detection with automatic redirect handling
+  // Payment detection and processing
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const currentURL = window.location.href;
-    
-    // Collect all URL parameters
-    const allParams = Object.fromEntries(urlParams.entries());
-    const hasAnyParams = Object.keys(allParams).length > 0;
-    
-    // Check for Stripe-specific parameters
     const sessionId = urlParams.get('session_id');
     const paymentSuccess = urlParams.get('payment_success');
-    const paymentIntent = urlParams.get('payment_intent');
-    const checkoutSessionId = urlParams.get('checkout_session_id');
+    const success = urlParams.get('success');
     
-    // Check localStorage for order data
-    const savedOrderData = localStorage.getItem('zeyaOrderData');
-    const hasOrderData = !!savedOrderData;
+    const isPaymentSuccess = sessionId || paymentSuccess === 'true' || success === 'true';
     
-    // Enhanced payment success detection
-    const isPaymentSuccess = 
-      sessionId || 
-      paymentIntent ||
-      checkoutSessionId ||
-      paymentSuccess === 'true' ||
-      urlParams.get('success') === 'true' ||
-      (hasOrderData && hasAnyParams);
-    
-    // Payment cancellation detection
-    const isPaymentCanceled = 
-      urlParams.get('payment_canceled') === 'true' ||
-      urlParams.get('canceled') === 'true';
-    
-    // 🚨 DETAILED DEBUGGING
-    console.log('🎯 PAYMENT DETECTION DEBUG:', {
-      currentURL,
-      allParams,
-      sessionId,
-      paymentSuccess,
-      hasOrderData,
-      savedOrderData: savedOrderData ? JSON.parse(savedOrderData) : null,
-      isPaymentSuccess,
-      isPaymentCanceled
-    });
+    console.log('Payment Detection:', { sessionId, paymentSuccess, success, isPaymentSuccess });
     
     if (isPaymentSuccess) {
-      console.log('✅ Payment success detected!');
-      
-      // Payment successful - process automatically
       const savedData = localStorage.getItem('zeyaOrderData');
+      
       if (savedData) {
-        console.log('📦 Found saved order data:', savedData);
-        
         const orderData = JSON.parse(savedData);
         setSelectedPlan(orderData.selectedPlan);
         setSurveyData(orderData.surveyData);
         
-        // Save customer record for admin
-        const customerId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const customerRecord = {
-          ...orderData.surveyData,
-          selectedPlan: orderData.selectedPlan,
-          timestamp: new Date().toISOString(),
-          paymentStatus: 'completed_auto_detected',
-          sessionId: sessionId || 'unknown',
-          debugInfo: { currentURL, allParams }
-        };
-        localStorage.setItem(customerId, JSON.stringify(customerRecord));
-        
-        // 🤖 Send immediate notification
-        const fullCustomerData = {
+        // Send notifications
+        processNotifications({
           ...orderData.surveyData,
           selectedPlan: orderData.selectedPlan
-        };
-        
-        console.log('🚀 Sending notifications with data:', fullCustomerData);
-        processCustomerNotification(fullCustomerData);
+        });
         
         localStorage.removeItem('zeyaOrderData');
-        console.log('🗑️ Cleaned up order data');
-        
-        // Navigate to thank you page
-        setShowSurvey(false);
-        setShowDetailedSurvey(false);
-        setShowPlanSelection(false);
         setShowThankYou(true);
       } else {
-        console.warn('⚠️ No saved order data found in localStorage!');
-        console.log('🔄 Showing data recovery screen...');
-        
-        // Show data recovery screen instead of alert
+        // Show data recovery
+        const detectedPlan = detectPlanFromUrl(urlParams);
+        setSelectedPlan(detectedPlan);
         setShowDataRecovery(true);
-        setShowSurvey(false);
-        setShowDetailedSurvey(false);
-        setShowPlanSelection(false);
-        setShowThankYou(false);
       }
       
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (isPaymentCanceled) {
-      console.log('❌ Payment canceled detected');
-      
-      // Payment canceled - return to plan selection
-      const savedData = localStorage.getItem('zeyaOrderData');
-      if (savedData) {
-        const orderData = JSON.parse(savedData);
-        setSelectedPlan(orderData.selectedPlan);
-        setSurveyData(orderData.surveyData);
-      }
-      
-      setShowPlanSelection(true);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-      console.log('ℹ️ No payment status detected');
     }
   }, []);
 
@@ -525,21 +322,19 @@ const ZeyaApp = () => {
     }
   ];
 
-  // 🤖 Send Telegram notification
+  // Send Telegram notification
   const sendTelegramNotification = async (customerData) => {
-    console.log('📱 Sending Telegram notification with data:', customerData);
-    
     try {
       const message = `
 🎉 *New Zeya Customer Registration!*
 
-👤 *Name:* ${customerData.name || 'Not provided'}
-📅 *Age:* ${customerData.age || 'Not provided'}
-🌍 *Country:* ${customerData.country || 'Not provided'}
-📱 *Telegram:* ${customerData.telegramUsername || 'Not provided'}
+👤 *Name:* ${customerData.name || 'N/A'}
+📅 *Age:* ${customerData.age || 'N/A'}
+🌍 *Country:* ${customerData.country || 'N/A'}
+📱 *Telegram:* ${customerData.telegramUsername || 'N/A'}
 
-💰 *Plan:* ${customerData.selectedPlan?.name || 'Not provided'}
-💵 *Price:* ${customerData.selectedPlan?.price || 'Not provided'}
+💰 *Plan:* ${customerData.selectedPlan?.name || 'N/A'}
+💵 *Price:* $${customerData.selectedPlan?.price || 'N/A'}
 
 📝 *Life Situation:* ${customerData.lifeSituation || 'N/A'}
 💬 *Communication Style:* ${customerData.communicationStyle || 'N/A'}
@@ -556,18 +351,9 @@ const ZeyaApp = () => {
 🌐 *Website:* https://zeyalove.com
       `.trim();
 
-      console.log('📝 Telegram message content:', message);
-
-      const telegramURL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
-      
-      console.log('🔗 Telegram API URL:', telegramURL);
-      console.log('📨 Sending to chat ID:', TELEGRAM_CONFIG.chatId);
-      
-      const response = await fetch(telegramURL, {
+      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: TELEGRAM_CONFIG.chatId,
           text: message,
@@ -575,24 +361,15 @@ const ZeyaApp = () => {
         })
       });
 
-      const responseData = await response.json();
-      console.log('📱 Telegram API response:', responseData);
-
-      if (response.ok) {
-        console.log('✅ Telegram notification sent successfully!');
-        return { success: true };
-      } else {
-        console.error('❌ Telegram API error:', responseData);
-        return { success: false, error: responseData };
-      }
+      return { success: response.ok };
     } catch (error) {
-      console.error('❌ Telegram notification failed:', error);
-      return { success: false, error };
+      console.error('Telegram notification failed:', error);
+      return { success: false };
     }
   };
 
-  // Email notification function
-  const sendCustomerEmail = async (customerData) => {
+  // Send email notification
+  const sendEmailNotification = async (customerData) => {
     try {
       const templateParams = {
         user_name: customerData.name,
@@ -620,74 +397,50 @@ const ZeyaApp = () => {
         EMAILJS_CONFIG.publicKey
       );
 
-      console.log('✅ Email notification sent successfully:', result.text);
-      return { success: true, result };
+      return { success: true };
     } catch (error) {
-      console.error('❌ Email notification failed:', error);
-      return { success: false, error };
+      console.error('Email notification failed:', error);
+      return { success: false };
     }
   };
 
-  // Process customer notifications (Telegram + Email)
-  const processCustomerNotification = async (customerData) => {
-    console.log('🚀 Starting customer notification process...');
-    console.log('📊 Customer data received:', customerData);
-    
-    setCustomerNotificationStatus('sending');
+  // Process notifications
+  const processNotifications = async (customerData) => {
+    setNotificationStatus('sending');
     
     try {
-      // Send Telegram notification (priority)
-      console.log('📱 Attempting Telegram notification...');
       const telegramResult = await sendTelegramNotification(customerData);
-      console.log('📱 Telegram result:', telegramResult);
-      
-      // Send email notification (backup)
-      console.log('📧 Attempting email notification...');
-      const emailResult = await sendCustomerEmail(customerData);
-      console.log('📧 Email result:', emailResult);
+      const emailResult = await sendEmailNotification(customerData);
       
       if (telegramResult.success || emailResult.success) {
-        setCustomerNotificationStatus('sent');
-        console.log('✅ Customer notification processing completed successfully');
-        console.log(`📊 Success status: Telegram=${telegramResult.success}, Email=${emailResult.success}`);
+        setNotificationStatus('sent');
       } else {
-        setCustomerNotificationStatus('error');
-        console.error('❌ All notification methods failed');
-        console.error('📱 Telegram error:', telegramResult.error);
-        console.error('📧 Email error:', emailResult.error);
+        setNotificationStatus('error');
       }
     } catch (error) {
-      setCustomerNotificationStatus('error');
-      console.error('❌ Notification processing error:', error);
+      setNotificationStatus('error');
     }
   };
 
   const handleSecureInputChange = (field, value) => {
-    if (!SecurityUtils.rateLimiter.isAllowed(`input_${field}`, 50, 60000)) {
-      setErrors(prev => ({ ...prev, [field]: 'Too many input attempts. Please wait a moment and try again.' }));
-      return;
-    }
-
     const sanitizedValue = SecurityUtils.sanitizeInput(value);
     
     let error = '';
     switch (field) {
       case 'name':
         if (!SecurityUtils.validateInput.name(sanitizedValue)) {
-          error = 'Name must be 2-50 characters long and contain only letters.';
+          error = 'Name must be 2-50 characters and contain only letters.';
         }
         break;
       case 'age':
         if (!SecurityUtils.validateInput.age(sanitizedValue)) {
-          error = 'You must be between 18 and 120 years old to join.';
+          error = 'Age must be between 18 and 120.';
         }
         break;
       case 'telegramUsername':
         if (!SecurityUtils.validateInput.telegram(sanitizedValue)) {
-          error = 'Please enter a valid Telegram username format (@username).';
+          error = 'Please enter a valid Telegram username (@username).';
         }
-        break;
-      default:
         break;
     }
 
@@ -711,78 +464,31 @@ const ZeyaApp = () => {
 
   const handlePayment = (planName, price) => {
     const selectedPlanData = { name: planName, price: price };
-    setSelectedPlan(selectedPlanData);
     
-    // 🚨 DETAILED SURVEY DATA LOGGING
-    console.log('💾 Saving order data:', {
-      selectedPlan: selectedPlanData,
-      surveyData: surveyData,
-      timestamp: Date.now()
-    });
-    
-    // Validate survey data before saving
+    // Validate required data
     const requiredFields = ['name', 'age', 'country', 'telegramUsername'];
     const missingFields = requiredFields.filter(field => !surveyData[field]);
     
     if (missingFields.length > 0) {
-      console.error('❌ Missing required fields:', missingFields);
-      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+      alert(`Please fill in: ${missingFields.join(', ')}`);
       return;
     }
     
-    // Save order data to localStorage with extra validation
+    // Save order data
     const orderData = {
       selectedPlan: selectedPlanData,
-      surveyData: {
-        ...surveyData,
-        // Ensure all fields are properly saved
-        name: surveyData.name?.trim() || '',
-        age: surveyData.age?.toString() || '',
-        country: surveyData.country || '',
-        telegramUsername: surveyData.telegramUsername?.trim() || '',
-        lifeSituation: surveyData.lifeSituation || '',
-        communicationStyle: surveyData.communicationStyle || '',
-        personalityType: surveyData.personalityType || '',
-        dailySchedule: surveyData.dailySchedule || '',
-        interests: surveyData.interests || [],
-        emotionalSupportStyle: surveyData.emotionalSupportStyle || '',
-        stressReliefStyle: surveyData.stressReliefStyle || '',
-        emotionalOpenness: surveyData.emotionalOpenness || '',
-        idealRelationshipStyle: surveyData.idealRelationshipStyle || ''
-      },
-      timestamp: Date.now(),
-      debugSaveTime: new Date().toISOString()
+      surveyData: { ...surveyData },
+      timestamp: Date.now()
     };
     
-    // Double-check data before saving
-    console.log('📋 Final order data to save:', orderData);
+    localStorage.setItem('zeyaOrderData', JSON.stringify(orderData));
     
-    try {
-      localStorage.setItem('zeyaOrderData', JSON.stringify(orderData));
-      console.log('✅ Order data saved successfully');
-      
-      // Verify it was saved
-      const verification = localStorage.getItem('zeyaOrderData');
-      if (verification) {
-        console.log('✅ Verification: Data exists in localStorage');
-      } else {
-        console.error('❌ Verification failed: Data not found in localStorage');
-      }
-    } catch (error) {
-      console.error('❌ Failed to save order data:', error);
-      alert('Failed to save your information. Please try again.');
-      return;
-    }
-    
-    // Redirect to Stripe payment
+    // Redirect to Stripe
     const stripeUrl = stripePaymentLinks[planName];
-    
     if (stripeUrl) {
-      console.log(`🎯 Redirecting to ${planName} payment: ${stripeUrl}`);
       window.location.href = stripeUrl;
     } else {
-      console.error('❌ No payment link found for plan:', planName);
-      alert('Payment link not found for this plan. Please contact support.');
+      alert('Payment link not found. Please contact support.');
     }
   };
 
@@ -797,13 +503,15 @@ const ZeyaApp = () => {
               Payment Successful! 🎉
             </h2>
             <p className="text-gray-600 mb-6">
-              We detected your successful payment, but need to collect your information to complete your companion matching.
+              We detected your successful payment. Please provide your information to complete your companion matching.
             </p>
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6">
-              <p className="text-blue-800 font-medium">
-                📋 Please provide your basic information below to activate your subscription and receive your companion match.
-              </p>
-            </div>
+            {selectedPlan && (
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6">
+                <p className="text-blue-800 font-medium">
+                  💰 <strong>Plan:</strong> {selectedPlan.name} (${selectedPlan.price}/month)
+                </p>
+              </div>
+            )}
           </div>
           
           <div className="space-y-6">
@@ -852,10 +560,6 @@ const ZeyaApp = () => {
                     <option value="DE">Germany 🇩🇪</option>
                     <option value="FR">France 🇫🇷</option>
                     <option value="JP">Japan 🇯🇵</option>
-                    <option value="SG">Singapore 🇸🇬</option>
-                    <option value="NL">Netherlands 🇳🇱</option>
-                    <option value="SE">Sweden 🇸🇪</option>
-                    <option value="NO">Norway 🇳🇴</option>
                     <option value="OTHER">Other ✨</option>
                   </select>
                 </div>
@@ -873,18 +577,6 @@ const ZeyaApp = () => {
               </div>
             </div>
 
-            <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
-              <div className="flex items-start">
-                <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-yellow-800">Important</h4>
-                  <p className="text-yellow-700 text-sm mt-1">
-                    Your payment has been processed successfully. Please complete this form to receive your companion match within 12 hours.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <div className="flex gap-4 pt-6">
               <button
                 onClick={() => {
@@ -898,23 +590,16 @@ const ZeyaApp = () => {
               <button
                 onClick={() => {
                   if (!surveyData.name || !surveyData.age || !surveyData.country || !surveyData.telegramUsername) {
-                    alert('Please fill in all required fields (marked with *)');
+                    alert('Please fill in all required fields');
                     return;
                   }
                   
-                  // Create recovery data with estimated plan
                   const recoveryData = {
                     ...surveyData,
-                    selectedPlan: { 
-                      name: 'Soft Love', // Default plan for recovery
-                      price: 149 
-                    }
+                    selectedPlan: selectedPlan
                   };
                   
-                  console.log('🔄 Processing recovery data:', recoveryData);
-                  processCustomerNotification(recoveryData);
-                  
-                  setSelectedPlan(recoveryData.selectedPlan);
+                  processNotifications(recoveryData);
                   setShowDataRecovery(false);
                   setShowThankYou(true);
                 }}
@@ -929,6 +614,8 @@ const ZeyaApp = () => {
       </div>
     );
   }
+
+  // Survey Component
   if (showSurvey) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 flex items-center justify-center p-4">
@@ -988,10 +675,6 @@ const ZeyaApp = () => {
                     <option value="DE">Germany 🇩🇪</option>
                     <option value="FR">France 🇫🇷</option>
                     <option value="JP">Japan 🇯🇵</option>
-                    <option value="SG">Singapore 🇸🇬</option>
-                    <option value="NL">Netherlands 🇳🇱</option>
-                    <option value="SE">Sweden 🇸🇪</option>
-                    <option value="NO">Norway 🇳🇴</option>
                     <option value="OTHER">Other ✨</option>
                   </select>
                 </div>
@@ -1010,7 +693,6 @@ const ZeyaApp = () => {
               </div>
             </div>
 
-            {/* Terms Agreement */}
             <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
               <label className="flex items-start space-x-3 cursor-pointer">
                 <input
@@ -1058,7 +740,6 @@ const ZeyaApp = () => {
           </div>
         </div>
         
-        {/* Modals */}
         <PrivacyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
         <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
       </div>
@@ -1074,7 +755,7 @@ const ZeyaApp = () => {
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-4">
               Deep Emotional Compatibility Analysis, {surveyData.name} 🧠
             </h2>
-            <p className="text-gray-600">Our advanced AI analyzes your emotional patterns and relationship preferences to find your perfect soulmate match with 95% precision</p>
+            <p className="text-gray-600">Our AI analyzes your emotional patterns to find your perfect soulmate match with 95% precision</p>
           </div>
           
           <div className="space-y-8">
@@ -1302,7 +983,7 @@ const ZeyaApp = () => {
                 index === 2 
                   ? 'ring-4 ring-rose-300 bg-gradient-to-br from-rose-50 to-pink-50 transform scale-105' 
                   : 'bg-white/90 backdrop-blur-lg hover:bg-rose-50/50'
-              } border border-rose-100 relative`}>
+              } border border-rose-100`}>
 
                 <div className="text-center mb-8">
                   <Heart className={`h-10 w-10 mx-auto mb-4 ${index === 2 ? 'text-rose-500 fill-rose-500' : 'text-rose-400'}`} />
@@ -1368,7 +1049,6 @@ const ZeyaApp = () => {
             Payment Successful, {surveyData.name}!
           </h1>
           
-          {/* Payment Success Alert */}
           <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-8">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-green-500 rounded-full p-3">
@@ -1380,33 +1060,24 @@ const ZeyaApp = () => {
               🤖 Our AI matching system is now preparing your perfect companion match!
             </p>
             
-            {/* Professional Notification Status */}
             <div className="mt-4 p-3 bg-white rounded-xl border border-green-200">
-              {customerNotificationStatus === 'sending' && (
+              {notificationStatus === 'sending' && (
                 <div className="flex items-center justify-center text-blue-700">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2"></div>
                   Processing order confirmation...
                 </div>
               )}
-              {customerNotificationStatus === 'sent' && (
+              {notificationStatus === 'sent' && (
                 <div className="space-y-2">
-                  <div className="text-green-700">
-                    ✅ Order confirmation processed successfully
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Customer service team has been notified of your registration
-                  </div>
+                  <div className="text-green-700">✅ Order confirmation processed successfully</div>
+                  <div className="text-sm text-gray-600">Customer service team has been notified of your registration</div>
                 </div>
               )}
-              {customerNotificationStatus === 'error' && (
-                <div className="text-red-700">
-                  ⚠️ Notification processing delayed - Please contact support if needed
-                </div>
+              {notificationStatus === 'error' && (
+                <div className="text-red-700">⚠️ Notification processing delayed - Please contact support if needed</div>
               )}
-              {customerNotificationStatus === 'pending' && (
-                <div className="text-gray-600">
-                  🔄 Preparing order confirmation...
-                </div>
+              {notificationStatus === 'pending' && (
+                <div className="text-gray-600">🔄 Preparing order confirmation...</div>
               )}
             </div>
           </div>
@@ -1444,9 +1115,24 @@ const ZeyaApp = () => {
               setShowSurvey(false);
               setShowDetailedSurvey(false);
               setShowPlanSelection(false);
+              setShowDataRecovery(false);
               setSelectedPlan(null);
-              setCustomerNotificationStatus('pending');
-              localStorage.removeItem('zeyaOrderData');
+              setNotificationStatus('pending');
+              setSurveyData({
+                name: '',
+                age: '',
+                country: '',
+                telegramUsername: '',
+                lifeSituation: '',
+                communicationStyle: '',
+                personalityType: '',
+                dailySchedule: '',
+                interests: [],
+                emotionalSupportStyle: '',
+                stressReliefStyle: '',
+                emotionalOpenness: '',
+                idealRelationshipStyle: ''
+              });
             }}
             className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-10 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium text-lg"
           >
@@ -1533,36 +1219,6 @@ const ZeyaApp = () => {
           </div>
         </section>
 
-        {/* Journey Steps */}
-        <section className="py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
-                AI-Powered Perfect Matching Process
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Four scientific steps to finding your emotionally compatible companion through advanced AI analysis
-              </p>
-            </div>
-            <div className="grid md:grid-cols-4 gap-8">
-              {[
-                { icon: Users, title: 'Deep Personality Analysis', desc: 'Complete our comprehensive 50+ question assessment covering personality, values, and emotional needs' },
-                { icon: Sparkles, title: 'AI Matching Algorithm', desc: 'Our advanced AI analyzes your data to find the perfect companion with 95%+ compatibility' },
-                { icon: Shield, title: 'Choose Your Connection', desc: 'Select your preferred intimacy level and communication frequency' },
-                { icon: MessageCircle, title: 'Meet Your Perfect Match', desc: 'Connect with your scientifically-matched companion within 12 hours' }
-              ].map((step, index) => (
-                <div key={index} className="text-center group">
-                  <div className="bg-gradient-to-br from-rose-100 to-pink-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-xl">
-                    <step.icon className="h-12 w-12 text-gray-700" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-800">{step.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{step.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* FAQ Section */}
         <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1584,14 +1240,6 @@ const ZeyaApp = () => {
                 {
                   question: "How is Zeya different from platforms like OnlyFans? 🌟",
                   answer: "Zeya is a 100% Safe-for-Work (SFW) platform focused exclusively on emotional connection and meaningful relationships. Unlike adult platforms, we offer no sexual content whatsoever. Instead, we provide deeper emotional intimacy through genuine conversation, personal growth support, and authentic companionship that goes beyond surface-level interactions."
-                },
-                {
-                  question: "What makes your emotional connections deeper than other platforms? 💝",
-                  answer: "By removing sexual elements entirely, we create space for profound emotional intimacy. Our AI-matched companions focus on understanding your thoughts, dreams, fears, and aspirations. You'll experience genuine care, personalized attention, and meaningful conversations that help you grow as a person while feeling truly understood and valued."
-                },
-                {
-                  question: "How accurate is the AI matching process? 🎯",
-                  answer: "Our AI matching system has been trained on thousands of successful companion relationships and achieves a 95% compatibility rate. The comprehensive assessment analyzes psychological compatibility, communication styles, emotional needs, and lifestyle factors to ensure optimal matches. If you're not satisfied with your match within the first week, we offer free re-matching."
                 },
                 {
                   question: "What type of conversations can I have? 💬",
@@ -1672,7 +1320,6 @@ const ZeyaApp = () => {
           </div>
         </footer>
         
-        {/* Modals */}
         <PrivacyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
         <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
         <SupportModal isOpen={showSupportModal} onClose={() => setShowSupportModal(false)} />
