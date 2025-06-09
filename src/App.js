@@ -1,4 +1,4 @@
-\\import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
 
 // 🤖 Telegram Bot Configuration
