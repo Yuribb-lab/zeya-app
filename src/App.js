@@ -412,18 +412,26 @@ const ZeyaApp = () => {
       urlParams.get('payment_canceled') === 'true' ||
       urlParams.get('canceled') === 'true';
     
-    console.log('🎯 Payment Detection:', {
+    // 🚨 DETAILED DEBUGGING
+    console.log('🎯 PAYMENT DETECTION DEBUG:', {
       currentURL,
       allParams,
+      sessionId,
+      paymentSuccess,
+      hasOrderData,
+      savedOrderData: savedOrderData ? JSON.parse(savedOrderData) : null,
       isPaymentSuccess,
-      isPaymentCanceled,
-      hasOrderData
+      isPaymentCanceled
     });
     
     if (isPaymentSuccess) {
+      console.log('✅ Payment success detected!');
+      
       // Payment successful - process automatically
       const savedData = localStorage.getItem('zeyaOrderData');
       if (savedData) {
+        console.log('📦 Found saved order data:', savedData);
+        
         const orderData = JSON.parse(savedData);
         setSelectedPlan(orderData.selectedPlan);
         setSurveyData(orderData.surveyData);
@@ -435,7 +443,8 @@ const ZeyaApp = () => {
           selectedPlan: orderData.selectedPlan,
           timestamp: new Date().toISOString(),
           paymentStatus: 'completed_auto_detected',
-          sessionId: sessionId || 'unknown'
+          sessionId: sessionId || 'unknown',
+          debugInfo: { currentURL, allParams }
         };
         localStorage.setItem(customerId, JSON.stringify(customerRecord));
         
@@ -444,9 +453,15 @@ const ZeyaApp = () => {
           ...orderData.surveyData,
           selectedPlan: orderData.selectedPlan
         };
+        
+        console.log('🚀 Sending notifications with data:', fullCustomerData);
         processCustomerNotification(fullCustomerData);
         
         localStorage.removeItem('zeyaOrderData');
+        console.log('🗑️ Cleaned up order data');
+      } else {
+        console.warn('⚠️ No saved order data found in localStorage!');
+        alert('Payment detected but no order data found. Please contact support with your payment confirmation.');
       }
       
       // Navigate to thank you page
@@ -458,6 +473,8 @@ const ZeyaApp = () => {
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (isPaymentCanceled) {
+      console.log('❌ Payment canceled detected');
+      
       // Payment canceled - return to plan selection
       const savedData = localStorage.getItem('zeyaOrderData');
       if (savedData) {
@@ -468,6 +485,8 @@ const ZeyaApp = () => {
       
       setShowPlanSelection(true);
       window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+      console.log('ℹ️ No payment status detected');
     }
   }, []);
 
@@ -501,17 +520,19 @@ const ZeyaApp = () => {
 
   // 🤖 Send Telegram notification
   const sendTelegramNotification = async (customerData) => {
+    console.log('📱 Sending Telegram notification with data:', customerData);
+    
     try {
       const message = `
 🎉 *New Zeya Customer Registration!*
 
-👤 *Name:* ${customerData.name}
-📅 *Age:* ${customerData.age}
-🌍 *Country:* ${customerData.country}
-📱 *Telegram:* ${customerData.telegramUsername}
+👤 *Name:* ${customerData.name || 'Not provided'}
+📅 *Age:* ${customerData.age || 'Not provided'}
+🌍 *Country:* ${customerData.country || 'Not provided'}
+📱 *Telegram:* ${customerData.telegramUsername || 'Not provided'}
 
-💰 *Plan:* ${customerData.selectedPlan?.name}
-💵 *Price:* $${customerData.selectedPlan?.price}
+💰 *Plan:* ${customerData.selectedPlan?.name || 'Not provided'}
+💵 *Price:* ${customerData.selectedPlan?.price || 'Not provided'}
 
 📝 *Life Situation:* ${customerData.lifeSituation || 'N/A'}
 💬 *Communication Style:* ${customerData.communicationStyle || 'N/A'}
@@ -528,7 +549,12 @@ const ZeyaApp = () => {
 🌐 *Website:* https://zeyalove.com
       `.trim();
 
+      console.log('📝 Telegram message content:', message);
+
       const telegramURL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+      
+      console.log('🔗 Telegram API URL:', telegramURL);
+      console.log('📨 Sending to chat ID:', TELEGRAM_CONFIG.chatId);
       
       const response = await fetch(telegramURL, {
         method: 'POST',
@@ -542,13 +568,15 @@ const ZeyaApp = () => {
         })
       });
 
+      const responseData = await response.json();
+      console.log('📱 Telegram API response:', responseData);
+
       if (response.ok) {
         console.log('✅ Telegram notification sent successfully!');
         return { success: true };
       } else {
-        const errorData = await response.json();
-        console.error('❌ Telegram API error:', errorData);
-        return { success: false, error: errorData };
+        console.error('❌ Telegram API error:', responseData);
+        return { success: false, error: responseData };
       }
     } catch (error) {
       console.error('❌ Telegram notification failed:', error);
@@ -595,21 +623,31 @@ const ZeyaApp = () => {
 
   // Process customer notifications (Telegram + Email)
   const processCustomerNotification = async (customerData) => {
+    console.log('🚀 Starting customer notification process...');
+    console.log('📊 Customer data received:', customerData);
+    
     setCustomerNotificationStatus('sending');
     
     try {
       // Send Telegram notification (priority)
+      console.log('📱 Attempting Telegram notification...');
       const telegramResult = await sendTelegramNotification(customerData);
+      console.log('📱 Telegram result:', telegramResult);
       
       // Send email notification (backup)
+      console.log('📧 Attempting email notification...');
       const emailResult = await sendCustomerEmail(customerData);
+      console.log('📧 Email result:', emailResult);
       
       if (telegramResult.success || emailResult.success) {
         setCustomerNotificationStatus('sent');
-        console.log('✅ Customer notification processing completed');
+        console.log('✅ Customer notification processing completed successfully');
+        console.log(`📊 Success status: Telegram=${telegramResult.success}, Email=${emailResult.success}`);
       } else {
         setCustomerNotificationStatus('error');
         console.error('❌ All notification methods failed');
+        console.error('📱 Telegram error:', telegramResult.error);
+        console.error('📧 Email error:', emailResult.error);
       }
     } catch (error) {
       setCustomerNotificationStatus('error');
@@ -668,14 +706,66 @@ const ZeyaApp = () => {
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
     
-    // Save order data to localStorage
-    const orderData = {
+    // 🚨 DETAILED SURVEY DATA LOGGING
+    console.log('💾 Saving order data:', {
       selectedPlan: selectedPlanData,
       surveyData: surveyData,
       timestamp: Date.now()
+    });
+    
+    // Validate survey data before saving
+    const requiredFields = ['name', 'age', 'country', 'telegramUsername'];
+    const missingFields = requiredFields.filter(field => !surveyData[field]);
+    
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields);
+      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+    
+    // Save order data to localStorage with extra validation
+    const orderData = {
+      selectedPlan: selectedPlanData,
+      surveyData: {
+        ...surveyData,
+        // Ensure all fields are properly saved
+        name: surveyData.name?.trim() || '',
+        age: surveyData.age?.toString() || '',
+        country: surveyData.country || '',
+        telegramUsername: surveyData.telegramUsername?.trim() || '',
+        lifeSituation: surveyData.lifeSituation || '',
+        communicationStyle: surveyData.communicationStyle || '',
+        personalityType: surveyData.personalityType || '',
+        dailySchedule: surveyData.dailySchedule || '',
+        interests: surveyData.interests || [],
+        emotionalSupportStyle: surveyData.emotionalSupportStyle || '',
+        stressReliefStyle: surveyData.stressReliefStyle || '',
+        emotionalOpenness: surveyData.emotionalOpenness || '',
+        idealRelationshipStyle: surveyData.idealRelationshipStyle || ''
+      },
+      timestamp: Date.now(),
+      debugSaveTime: new Date().toISOString()
     };
     
-    localStorage.setItem('zeyaOrderData', JSON.stringify(orderData));
+    // Double-check data before saving
+    console.log('📋 Final order data to save:', orderData);
+    
+    try {
+      localStorage.setItem('zeyaOrderData', JSON.stringify(orderData));
+      console.log('✅ Order data saved successfully');
+      
+      // Verify it was saved
+      const verification = localStorage.getItem('zeyaOrderData');
+      if (verification) {
+        console.log('✅ Verification: Data exists in localStorage');
+      } else {
+        console.error('❌ Verification failed: Data not found in localStorage');
+      }
+    } catch (error) {
+      console.error('❌ Failed to save order data:', error);
+      alert('Failed to save your information. Please try again.');
+      return;
+    }
     
     // Redirect to Stripe payment
     const stripeUrl = stripePaymentLinks[planName];
@@ -684,6 +774,7 @@ const ZeyaApp = () => {
       console.log(`🎯 Redirecting to ${planName} payment: ${stripeUrl}`);
       window.location.href = stripeUrl;
     } else {
+      console.error('❌ No payment link found for plan:', planName);
       alert('Payment link not found for this plan. Please contact support.');
     }
   };
