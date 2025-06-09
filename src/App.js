@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
 
-// EmailJS Configuration - 수정된 이메일 주소
-const EMAILJS_CONFIG = {
-  serviceId: 'service_yhvld4q',
-  templateId: 'template_p4xs1g7',
-  publicKey: 'tm5FWkK5QT0tMftOh'
-};
-
+// EmailJS 라이브러리 없이 직접 구현할 수 없으므로 제거하고 텔레그램만 사용
 // 🤖 Telegram Bot Configuration
 const TELEGRAM_CONFIG = {
   botToken: '7948996488:AAG_5aMk6_OFg22QM411BdZ54TUPzJqvnxA',
@@ -64,12 +58,6 @@ const SecurityUtils = {
       SecurityUtils.rateLimiter.attempts.set(key, validAttempts);
       return true;
     }
-  },
-
-  generateSessionToken: () => {
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 };
 
@@ -361,104 +349,74 @@ const ZeyaApp = () => {
     personalityType: '',
     dailySchedule: '',
     interests: [],
-    stressHandling: '',
-    supportStyle: '',
-    relationshipValues: [],
-    freeTimeStyle: '',
+    emotionalSupport: '',
+    stressRelief: '',
+    emotionalOpenness: '',
+    idealRelationship: '',
+    hobbiesAndActivities: '',
+    personalityTraits: '',
     communicationFrequency: '',
-    emotionalOpenTime: '',
-    currentGoals: '',
-    supportNeeds: ''
+    relationshipGoals: ''
   });
 
   // 🔍 Enhanced payment detection with automatic redirect handling
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const currentURL = window.location.href;
-    
-    // Collect all URL parameters
-    const allParams = Object.fromEntries(urlParams.entries());
-    const hasAnyParams = Object.keys(allParams).length > 0;
     
     // Check for Stripe-specific parameters
     const sessionId = urlParams.get('session_id');
     const paymentSuccess = urlParams.get('payment_success');
     const paymentIntent = urlParams.get('payment_intent');
     const checkoutSessionId = urlParams.get('checkout_session_id');
-    
-    // Check localStorage for order data
-    const savedOrderData = localStorage.getItem('zeyaOrderData');
-    const hasOrderData = !!savedOrderData;
+    const success = urlParams.get('success');
     
     // Enhanced payment success detection
-    const isPaymentSuccess = 
-      sessionId || 
-      paymentIntent ||
-      checkoutSessionId ||
-      paymentSuccess === 'true' ||
-      urlParams.get('success') === 'true' ||
-      (hasOrderData && hasAnyParams);
-    
-    // Payment cancellation detection
-    const isPaymentCanceled = 
-      urlParams.get('payment_canceled') === 'true' ||
-      urlParams.get('canceled') === 'true';
+    const isPaymentSuccess = sessionId || paymentIntent || checkoutSessionId || 
+                            paymentSuccess === 'true' || success === 'true';
     
     console.log('🎯 Payment Detection:', {
-      currentURL,
-      allParams,
-      isPaymentSuccess,
-      isPaymentCanceled,
-      hasOrderData
+      sessionId, paymentSuccess, paymentIntent, isPaymentSuccess
     });
     
     if (isPaymentSuccess) {
-      // Payment successful - process automatically
+      // 저장된 데이터 복원
       const savedData = localStorage.getItem('zeyaOrderData');
+      console.log('💾 Saved Data:', savedData);
+      
       if (savedData) {
-        const orderData = JSON.parse(savedData);
-        setSelectedPlan(orderData.selectedPlan);
-        setSurveyData(orderData.surveyData);
-        
-        // Save customer record for admin
-        const customerId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const customerRecord = {
-          ...orderData.surveyData,
-          selectedPlan: orderData.selectedPlan,
-          timestamp: new Date().toISOString(),
-          paymentStatus: 'completed_auto_detected',
-          sessionId: sessionId || 'unknown'
-        };
-        localStorage.setItem(customerId, JSON.stringify(customerRecord));
-        
-        // 🤖 Send immediate notification
-        const fullCustomerData = {
-          ...orderData.surveyData,
-          selectedPlan: orderData.selectedPlan
-        };
-        processCustomerNotification(fullCustomerData);
-        
-        localStorage.removeItem('zeyaOrderData');
+        try {
+          const orderData = JSON.parse(savedData);
+          console.log('📄 Parsed Order Data:', orderData);
+          
+          // 상태 복원
+          setSelectedPlan(orderData.selectedPlan);
+          setSurveyData(orderData.surveyData);
+          
+          // 텔레그램 알림 전송
+          const fullCustomerData = {
+            ...orderData.surveyData,
+            selectedPlan: orderData.selectedPlan
+          };
+          
+          console.log('📤 Sending notification with data:', fullCustomerData);
+          processCustomerNotification(fullCustomerData);
+          
+          // 로컬스토리지 정리
+          localStorage.removeItem('zeyaOrderData');
+        } catch (error) {
+          console.error('❌ Error parsing saved data:', error);
+        }
+      } else {
+        console.log('⚠️ No saved data found in localStorage');
       }
       
-      // Navigate to thank you page
+      // Thank you 페이지로 이동
       setShowSurvey(false);
       setShowDetailedSurvey(false);
       setShowPlanSelection(false);
       setShowThankYou(true);
       
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (isPaymentCanceled) {
-      // Payment canceled - return to plan selection
-      const savedData = localStorage.getItem('zeyaOrderData');
-      if (savedData) {
-        const orderData = JSON.parse(savedData);
-        setSelectedPlan(orderData.selectedPlan);
-        setSurveyData(orderData.surveyData);
-      }
-      
-      setShowPlanSelection(true);
+      // URL 정리
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -494,16 +452,19 @@ const ZeyaApp = () => {
   // 🤖 Send Telegram notification
   const sendTelegramNotification = async (customerData) => {
     try {
+      console.log('📤 Sending Telegram notification...');
+      console.log('Customer Data:', customerData);
+      
       const message = `
 🎉 *New Zeya Customer Registration!*
 
-👤 *Name:* ${customerData.name}
-📅 *Age:* ${customerData.age}
-🌍 *Country:* ${customerData.country}
-📱 *Telegram:* ${customerData.telegramUsername}
+👤 *Name:* ${customerData.name || 'N/A'}
+📅 *Age:* ${customerData.age || 'N/A'}
+🌍 *Country:* ${customerData.country || 'N/A'}
+📱 *Telegram:* ${customerData.telegramUsername || 'N/A'}
 
-💰 *Plan:* ${customerData.selectedPlan?.name}
-💵 *Price:* $${customerData.selectedPlan?.price}
+💰 *Plan:* ${customerData.selectedPlan?.name || 'N/A'}
+💵 *Price:* $${customerData.selectedPlan?.price || 'N/A'}
 
 📝 *Life Situation:* ${customerData.lifeSituation || 'N/A'}
 💬 *Communication Style:* ${customerData.communicationStyle || 'N/A'}
@@ -511,10 +472,17 @@ const ZeyaApp = () => {
 ⏰ *Daily Schedule:* ${customerData.dailySchedule || 'N/A'}
 🎯 *Interests:* ${customerData.interests?.join(', ') || 'N/A'}
 
+💖 *Emotional Support:* ${customerData.emotionalSupport || 'N/A'}
+🌸 *Stress Relief:* ${customerData.stressRelief || 'N/A'}
+💕 *Emotional Openness:* ${customerData.emotionalOpenness || 'N/A'}
+👥 *Ideal Relationship:* ${customerData.idealRelationship || 'N/A'}
+
 ⏰ *Registration Time:* ${new Date().toLocaleString('en-US')}
 🌐 *Website:* https://zeyalove.com
       `.trim();
 
+      console.log('Message to send:', message);
+      
       const telegramURL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
       
       const response = await fetch(telegramURL, {
@@ -529,13 +497,15 @@ const ZeyaApp = () => {
         })
       });
 
+      const responseData = await response.json();
+      console.log('Telegram Response:', responseData);
+
       if (response.ok) {
         console.log('✅ Telegram notification sent successfully!');
         return { success: true };
       } else {
-        const errorData = await response.json();
-        console.error('❌ Telegram API error:', errorData);
-        return { success: false, error: errorData };
+        console.error('❌ Telegram API error:', responseData);
+        return { success: false, error: responseData };
       }
     } catch (error) {
       console.error('❌ Telegram notification failed:', error);
@@ -543,67 +513,21 @@ const ZeyaApp = () => {
     }
   };
 
-  // Email notification function
-  const sendCustomerEmail = async (customerData) => {
-    try {
-      const templateParams = {
-        user_name: customerData.name,
-        user_age: customerData.age,
-        user_country: customerData.country,
-        telegram_username: customerData.telegramUsername,
-        life_situation: customerData.lifeSituation || 'Not specified',
-        communication_style: customerData.communicationStyle || 'Not specified',
-        personality_type: customerData.personalityType || 'Not specified',
-        daily_schedule: customerData.dailySchedule || 'Not specified',
-        interests: customerData.interests?.join(', ') || 'Not specified',
-        selected_plan: customerData.selectedPlan?.name || 'Not specified',
-        plan_price: customerData.selectedPlan?.price || 'Not specified',
-        submission_time: new Date().toLocaleString()
-      };
-
-      const result = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_id: EMAILJS_CONFIG.serviceId,
-          template_id: EMAILJS_CONFIG.templateId,
-          user_id: EMAILJS_CONFIG.publicKey,
-          template_params: templateParams
-        })
-      });
-
-      if (result.ok) {
-        console.log('✅ Email notification sent successfully');
-        return { success: true };
-      } else {
-        console.error('❌ Email notification failed');
-        return { success: false };
-      }
-    } catch (error) {
-      console.error('❌ Email notification failed:', error);
-      return { success: false, error };
-    }
-  };
-
-  // Process customer notifications (Telegram + Email)
+  // Process customer notifications
   const processCustomerNotification = async (customerData) => {
+    console.log('🔄 Processing customer notification...');
     setCustomerNotificationStatus('sending');
     
     try {
-      // Send Telegram notification (priority)
+      // 텔레그램 알림 전송
       const telegramResult = await sendTelegramNotification(customerData);
       
-      // Send email notification (backup)
-      const emailResult = await sendCustomerEmail(customerData);
-      
-      if (telegramResult.success || emailResult.success) {
+      if (telegramResult.success) {
         setCustomerNotificationStatus('sent');
-        console.log('✅ Customer notification processing completed');
+        console.log('✅ Customer notification sent successfully');
       } else {
         setCustomerNotificationStatus('error');
-        console.error('❌ All notification methods failed');
+        console.error('❌ Telegram notification failed:', telegramResult.error);
       }
     } catch (error) {
       setCustomerNotificationStatus('error');
@@ -649,11 +573,20 @@ const ZeyaApp = () => {
       alert('Please agree to our Terms of Service and Privacy Policy to continue.');
       return;
     }
+    
+    // 기본 정보 검증
+    if (!surveyData.name || !surveyData.age || !surveyData.country || !surveyData.telegramUsername) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+    
+    console.log('✅ Basic info submitted:', surveyData);
     setShowSurvey(false);
     setShowDetailedSurvey(true);
   };
 
   const handleDetailedSurveySubmit = () => {
+    console.log('✅ Detailed survey submitted:', surveyData);
     setShowDetailedSurvey(false);
     setShowPlanSelection(true);
   };
@@ -662,16 +595,23 @@ const ZeyaApp = () => {
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
     
-    // Save order data to localStorage
-    const orderData = {
+    // 완전한 데이터 준비
+    const completeOrderData = {
       selectedPlan: selectedPlanData,
-      surveyData: surveyData,
+      surveyData: { ...surveyData }, // 전체 설문 데이터 복사
       timestamp: Date.now()
     };
     
-    localStorage.setItem('zeyaOrderData', JSON.stringify(orderData));
+    console.log('💾 Saving order data to localStorage:', completeOrderData);
     
-    // Redirect to Stripe payment
+    // localStorage에 저장
+    localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
+    
+    // 저장 확인
+    const verification = localStorage.getItem('zeyaOrderData');
+    console.log('✅ Verification - Data saved:', verification);
+    
+    // Stripe 결제로 리다이렉트
     const stripeUrl = stripePaymentLinks[planName];
     
     if (stripeUrl) {
@@ -907,6 +847,84 @@ const ZeyaApp = () => {
               </div>
             </div>
 
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100">
+              <h3 className="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
+                <Heart className="h-5 w-5 mr-2" />
+                Your Emotional Journey
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you prefer emotional support?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.emotionalSupport}
+                    onChange={(e) => handleSecureInputChange('emotionalSupport', e.target.value)}
+                  >
+                    <option value="">Choose your support style...</option>
+                    <option value="warm-empathy">🤗 Warm comfort & empathy</option>
+                    <option value="practical-advice">💡 Practical advice & solutions</option>
+                    <option value="quiet-listening">👂 Quiet listening & presence</option>
+                    <option value="humor-energy">🌈 Humor & positive energy</option>
+                    <option value="companionship">🤝 Simply being there together</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you handle stress?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.stressRelief}
+                    onChange={(e) => handleSecureInputChange('stressRelief', e.target.value)}
+                  >
+                    <option value="">Your healing method...</option>
+                    <option value="alone-time">🛋️ Alone time to recharge</option>
+                    <option value="social-connection">👫 Talking with people</option>
+                    <option value="physical-activity">🏃‍♀️ Exercise & movement</option>
+                    <option value="mindful-arts">🧘‍♀️ Meditation, music, arts</option>
+                    <option value="new-environment">🎪 New places & experiences</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-2xl border border-pink-100">
+              <h3 className="text-lg font-semibold text-pink-800 mb-4 flex items-center">
+                <Users className="h-5 w-5 mr-2" />
+                Your Heart's Desires
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How quickly do you open your heart?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.emotionalOpenness}
+                    onChange={(e) => handleSecureInputChange('emotionalOpenness', e.target.value)}
+                  >
+                    <option value="">Your emotional timing...</option>
+                    <option value="immediate">🌅 Naturally open from the start</option>
+                    <option value="few-days">🌤️ After a few days of chatting</option>
+                    <option value="few-weeks">🌙 After weeks of building trust</option>
+                    <option value="few-months">🌌 Slowly over several months</option>
+                    <option value="situational">🎭 Depends on the feeling & situation</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your ideal relationship dynamic?</label>
+                  <select
+                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
+                    value={surveyData.idealRelationship}
+                    onChange={(e) => handleSecureInputChange('idealRelationship', e.target.value)}
+                  >
+                    <option value="">Your perfect connection...</option>
+                    <option value="devoted-priority">👑 Being each other's top priority</option>
+                    <option value="growth-partnership">🌱 Growing & evolving together</option>
+                    <option value="stable-comfort">🏠 Comfortable, stable daily sharing</option>
+                    <option value="passionate-romantic">🎭 Passionate & deeply romantic</option>
+                    <option value="independent-support">🤝 Independent yet supportive</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-2xl border border-orange-100">
               <h3 className="text-lg font-semibold text-orange-800 mb-4 flex items-center">
                 <Sparkles className="h-5 w-5 mr-2" />
@@ -1041,7 +1059,7 @@ const ZeyaApp = () => {
         <div className="max-w-2xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 text-center border border-rose-200">
           <div className="text-8xl mb-6">🎉</div>
           <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
-            Payment Successful, {surveyData.name}!
+            Payment Successful, {surveyData.name || 'valued customer'}!
           </h1>
           
           {/* Payment Success Alert */}
@@ -1105,14 +1123,27 @@ const ZeyaApp = () => {
           <div className="bg-blue-50 p-6 rounded-2xl mb-8 border border-blue-100">
             <h4 className="font-bold text-blue-800 mb-3">📱 Your Companion Will Contact You At:</h4>
             <div className="space-y-2 text-blue-700">
-              <p><strong>Telegram:</strong> {surveyData.telegramUsername}</p>
-              <p><strong>Plan:</strong> {selectedPlan?.name}</p>
-              <p><strong>Location:</strong> {surveyData.country}</p>
+              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Your provided username'}</p>
+              <p><strong>Plan:</strong> {selectedPlan?.name || 'Selected plan'}</p>
+              <p><strong>Location:</strong> {surveyData.country || 'Your location'}</p>
               <p className="text-sm mt-3 text-blue-600">
                 💬 <strong>Expected Contact Time:</strong> Within 12 hours of payment confirmation
               </p>
             </div>
           </div>
+
+          {/* Debug Info (only shows if survey data exists) */}
+          {surveyData.name && (
+            <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-gray-600">
+              <p><strong>Debug Info:</strong></p>
+              <p>Name: {surveyData.name}</p>
+              <p>Age: {surveyData.age}</p>
+              <p>Country: {surveyData.country}</p>
+              <p>Telegram: {surveyData.telegramUsername}</p>
+              <p>Communication Style: {surveyData.communicationStyle}</p>
+              <p>Interests: {surveyData.interests?.join(', ')}</p>
+            </div>
+          )}
 
           <button 
             onClick={() => {
@@ -1133,14 +1164,14 @@ const ZeyaApp = () => {
                 personalityType: '',
                 dailySchedule: '',
                 interests: [],
-                stressHandling: '',
-                supportStyle: '',
-                relationshipValues: [],
-                freeTimeStyle: '',
+                emotionalSupport: '',
+                stressRelief: '',
+                emotionalOpenness: '',
+                idealRelationship: '',
+                hobbiesAndActivities: '',
+                personalityTraits: '',
                 communicationFrequency: '',
-                emotionalOpenTime: '',
-                currentGoals: '',
-                supportNeeds: ''
+                relationshipGoals: ''
               });
             }}
             className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-10 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium text-lg"
