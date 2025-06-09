@@ -7,12 +7,12 @@ const TELEGRAM_CONFIG = {
   chatId: 6447858148
 };
 
-// 🚀 LIVE Stripe Payment Links for zeyalove.com
+// 🚀 Stripe Payment Links for zeyalove.com (Soft Love = TEST MODE)
 // ⚠️ IMPORTANT: Configure in Stripe Dashboard:
 // Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
 // (Cancel URL is not needed - Stripe handles this automatically)
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
+  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🧪 TEST LINK
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
@@ -454,7 +454,8 @@ const ZeyaApp = () => {
     {
       name: 'Soft Love',
       price: 149,
-      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection']
+      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection'],
+      isTest: true
     },
     {
       name: 'Romantic',
@@ -704,6 +705,12 @@ const ZeyaApp = () => {
     if (stripeUrl) {
       console.log(`🚀 Redirecting to ${planName} payment...`);
       console.log(`📍 Full redirect URL: ${stripeUrl}`);
+      
+      // Test mode warning for Soft Love
+      if (planName === 'Soft Love') {
+        console.log('🧪 TEST MODE: Using Stripe test link');
+        alert('🧪 TEST MODE: This is a test payment. Use test card: 4242 4242 4242 4242');
+      }
       
       window.location.href = stripeUrl;
     } else {
@@ -1101,6 +1108,14 @@ const ZeyaApp = () => {
                   : 'bg-white/90 backdrop-blur-lg hover:bg-rose-50/50'
               } border border-rose-100 relative`}>
 
+                {plan.isTest && (
+                  <div className="absolute -top-3 -right-3">
+                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      TEST MODE 🧪
+                    </span>
+                  </div>
+                )}
+
                 <div className="text-center mb-8">
                   <Heart className={`h-10 w-10 mx-auto mb-4 ${index === 2 ? 'text-rose-500 fill-rose-500' : 'text-rose-400'}`} />
                   <h3 className="text-2xl font-bold text-gray-800 mb-3">{plan.name}</h3>
@@ -1133,7 +1148,7 @@ const ZeyaApp = () => {
                       : 'bg-gray-100 text-gray-800 hover:bg-gradient-to-r hover:from-rose-400 hover:to-pink-400 hover:text-white'
                   }`}
                 >
-                  Choose This Plan ✨
+                  {plan.isTest ? 'Test This Plan 🧪' : 'Choose This Plan ✨'}
                 </button>
               </div>
             ))}
@@ -1217,6 +1232,7 @@ const ZeyaApp = () => {
             <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-6 rounded-2xl mb-8 border border-rose-100">
               <h3 className="text-lg font-bold text-rose-800 mb-2">
                 ✨ Your Active {selectedPlan.name} Plan
+                {selectedPlan.name === 'Soft Love' && <span className="text-blue-600 ml-2">🧪 (Test Mode)</span>}
               </h3>
               <p className="text-rose-600">Monthly subscription: ${selectedPlan.price}</p>
               <p className="text-sm text-rose-700 mt-2">🎯 Compatibility Score: 95%+ • Perfect Match Guaranteed</p>
