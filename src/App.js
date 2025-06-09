@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
 
-// EmailJS 라이브러리 없이 직접 구현할 수 없으므로 제거하고 텔레그램만 사용
 // 🤖 Telegram Bot Configuration
 const TELEGRAM_CONFIG = {
   botToken: '7948996488:AAG_5aMk6_OFg22QM411BdZ54TUPzJqvnxA',
@@ -10,7 +9,7 @@ const TELEGRAM_CONFIG = {
 
 // Stripe Payment Links (Production)
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
+  'Soft Love': 'hhttps://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
@@ -352,11 +351,7 @@ const ZeyaApp = () => {
     emotionalSupport: '',
     stressRelief: '',
     emotionalOpenness: '',
-    idealRelationship: '',
-    hobbiesAndActivities: '',
-    personalityTraits: '',
-    communicationFrequency: '',
-    relationshipGoals: ''
+    idealRelationship: ''
   });
 
   // 🔍 Enhanced payment detection with automatic redirect handling
@@ -379,18 +374,27 @@ const ZeyaApp = () => {
     });
     
     if (isPaymentSuccess) {
+      console.log('💳 Payment success detected, restoring data...');
+      
       // 저장된 데이터 복원
       const savedData = localStorage.getItem('zeyaOrderData');
-      console.log('💾 Saved Data:', savedData);
+      console.log('💾 Raw saved data:', savedData);
       
       if (savedData) {
         try {
           const orderData = JSON.parse(savedData);
-          console.log('📄 Parsed Order Data:', orderData);
+          console.log('📄 Parsed order data:', orderData);
           
-          // 상태 복원
-          setSelectedPlan(orderData.selectedPlan);
-          setSurveyData(orderData.surveyData);
+          // 즉시 상태 업데이트
+          if (orderData.selectedPlan) {
+            setSelectedPlan(orderData.selectedPlan);
+            console.log('✅ Plan restored:', orderData.selectedPlan);
+          }
+          
+          if (orderData.surveyData) {
+            setSurveyData(orderData.surveyData);
+            console.log('✅ Survey data restored:', orderData.surveyData);
+          }
           
           // 텔레그램 알림 전송
           const fullCustomerData = {
@@ -398,11 +402,13 @@ const ZeyaApp = () => {
             selectedPlan: orderData.selectedPlan
           };
           
-          console.log('📤 Sending notification with data:', fullCustomerData);
-          processCustomerNotification(fullCustomerData);
+          console.log('📤 Sending notification with full data:', fullCustomerData);
           
-          // 로컬스토리지 정리
-          localStorage.removeItem('zeyaOrderData');
+          // 즉시 알림 처리
+          setTimeout(() => {
+            processCustomerNotification(fullCustomerData);
+          }, 1000);
+          
         } catch (error) {
           console.error('❌ Error parsing saved data:', error);
         }
@@ -449,11 +455,11 @@ const ZeyaApp = () => {
     }
   ];
 
-  // 🤖 Send Telegram notification
+  // 🤖 Enhanced Telegram notification with better error handling
   const sendTelegramNotification = async (customerData) => {
     try {
-      console.log('📤 Sending Telegram notification...');
-      console.log('Customer Data:', customerData);
+      console.log('📤 Starting Telegram notification...');
+      console.log('Customer Data for notification:', customerData);
       
       const message = `
 🎉 *New Zeya Customer Registration!*
@@ -481,41 +487,49 @@ const ZeyaApp = () => {
 🌐 *Website:* https://zeyalove.com
       `.trim();
 
-      console.log('Message to send:', message);
+      console.log('📝 Message to send:', message);
       
       const telegramURL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+      console.log('🌐 Telegram URL:', telegramURL);
+      
+      const requestBody = {
+        chat_id: TELEGRAM_CONFIG.chatId,
+        text: message,
+        parse_mode: 'Markdown'
+      };
+      
+      console.log('📦 Request body:', requestBody);
       
       const response = await fetch(telegramURL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CONFIG.chatId,
-          text: message,
-          parse_mode: 'Markdown'
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const responseData = await response.json();
-      console.log('Telegram Response:', responseData);
+      console.log('📨 Telegram Response:', responseData);
+      console.log('📊 Response status:', response.status);
+      console.log('✅ Response ok:', response.ok);
 
-      if (response.ok) {
+      if (response.ok && responseData.ok) {
         console.log('✅ Telegram notification sent successfully!');
-        return { success: true };
+        return { success: true, data: responseData };
       } else {
         console.error('❌ Telegram API error:', responseData);
         return { success: false, error: responseData };
       }
     } catch (error) {
-      console.error('❌ Telegram notification failed:', error);
-      return { success: false, error };
+      console.error('❌ Telegram notification failed with exception:', error);
+      return { success: false, error: error.message };
     }
   };
 
   // Process customer notifications
   const processCustomerNotification = async (customerData) => {
     console.log('🔄 Processing customer notification...');
+    console.log('📋 Customer data received:', customerData);
     setCustomerNotificationStatus('sending');
     
     try {
@@ -586,6 +600,35 @@ const ZeyaApp = () => {
   };
 
   const handleDetailedSurveySubmit = () => {
+    // 상세 설문조사 필수 필드 검증
+    const requiredFields = {
+      lifeSituation: 'Life Situation',
+      communicationStyle: 'Communication Style', 
+      personalityType: 'Personality Type',
+      dailySchedule: 'Daily Schedule',
+      emotionalSupport: 'Emotional Support Style',
+      stressRelief: 'Stress Relief Method',
+      emotionalOpenness: 'Emotional Openness',
+      idealRelationship: 'Ideal Relationship Style'
+    };
+    
+    const missingFields = [];
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!surveyData[field]) {
+        missingFields.push(label);
+      }
+    }
+    
+    // 관심사 검증 (최소 1개)
+    if (!surveyData.interests || surveyData.interests.length === 0) {
+      missingFields.push('At least one Interest');
+    }
+    
+    if (missingFields.length > 0) {
+      alert(`Please fill in the following required fields:\n\n• ${missingFields.join('\n• ')}`);
+      return;
+    }
+    
     console.log('✅ Detailed survey submitted:', surveyData);
     setShowDetailedSurvey(false);
     setShowPlanSelection(true);
@@ -595,21 +638,38 @@ const ZeyaApp = () => {
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
     
-    // 완전한 데이터 준비
+    // 완전한 데이터 준비 및 검증
     const completeOrderData = {
       selectedPlan: selectedPlanData,
-      surveyData: { ...surveyData }, // 전체 설문 데이터 복사
+      surveyData: { 
+        ...surveyData,
+        // 추가 검증을 위해 현재 timestamp 추가
+        completedAt: new Date().toISOString()
+      },
       timestamp: Date.now()
     };
     
-    console.log('💾 Saving order data to localStorage:', completeOrderData);
+    console.log('💾 Saving COMPLETE order data:', completeOrderData);
     
     // localStorage에 저장
-    localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
-    
-    // 저장 확인
-    const verification = localStorage.getItem('zeyaOrderData');
-    console.log('✅ Verification - Data saved:', verification);
+    try {
+      localStorage.removeItem('zeyaOrderData'); // 기존 데이터 삭제
+      localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
+      
+      // 저장 검증
+      const verification = localStorage.getItem('zeyaOrderData');
+      const parsedVerification = JSON.parse(verification);
+      console.log('✅ Data saved and verified:', parsedVerification);
+      
+      if (!parsedVerification.surveyData.name) {
+        throw new Error('Critical: Name not saved properly');
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to save order data:', error);
+      alert('Error saving your information. Please try again.');
+      return;
+    }
     
     // Stripe 결제로 리다이렉트
     const stripeUrl = stripePaymentLinks[planName];
@@ -642,18 +702,19 @@ const ZeyaApp = () => {
               </h3>
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Name *</label>
                   <input
                     type="text"
                     placeholder="What should we call you?"
                     className={`w-full px-4 py-3 border ${errors.name ? 'border-red-300' : 'border-rose-200'} rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/70 transition-all`}
                     value={surveyData.name}
                     onChange={(e) => handleSecureInputChange('name', e.target.value)}
+                    required
                   />
                   {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Age *</label>
                   <input
                     type="number"
                     min="18"
@@ -662,17 +723,19 @@ const ZeyaApp = () => {
                     className={`w-full px-4 py-3 border ${errors.age ? 'border-red-300' : 'border-rose-200'} rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/70 transition-all`}
                     value={surveyData.age}
                     onChange={(e) => handleSecureInputChange('age', e.target.value)}
+                    required
                   />
                   {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Country/Region</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Country/Region *</label>
                   <select 
                     className="w-full px-4 py-3 border border-rose-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.country}
                     onChange={(e) => handleSecureInputChange('country', e.target.value)}
+                    required
                   >
                     <option value="">Choose your country...</option>
                     <option value="US">United States 🇺🇸</option>
@@ -697,6 +760,7 @@ const ZeyaApp = () => {
                     className={`w-full px-4 py-3 border ${errors.telegramUsername ? 'border-red-300' : 'border-rose-200'} rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/70 transition-all`}
                     value={surveyData.telegramUsername}
                     onChange={(e) => handleSecureInputChange('telegramUsername', e.target.value)}
+                    required
                   />
                   {errors.telegramUsername && <p className="text-red-500 text-xs mt-1">{errors.telegramUsername}</p>}
                   <p className="text-xs text-rose-600 mt-1">Required: This is how your companion will reach you ✨</p>
@@ -712,6 +776,7 @@ const ZeyaApp = () => {
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="mt-1 h-5 w-5 text-blue-500 rounded focus:ring-blue-300"
+                  required
                 />
                 <span className="text-sm text-gray-700">
                   I agree to the{' '}
@@ -779,11 +844,12 @@ const ZeyaApp = () => {
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">What fills your days?</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">What fills your days? *</label>
                   <select
                     className="w-full px-4 py-3 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.lifeSituation}
                     onChange={(e) => handleSecureInputChange('lifeSituation', e.target.value)}
+                    required
                   >
                     <option value="">Your current chapter...</option>
                     <option value="student">📚 Student (learning & growing)</option>
@@ -794,11 +860,12 @@ const ZeyaApp = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">When do you shine brightest?</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">When do you shine brightest? *</label>
                   <select
                     className="w-full px-4 py-3 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.dailySchedule}
                     onChange={(e) => handleSecureInputChange('dailySchedule', e.target.value)}
+                    required
                   >
                     <option value="">Your natural rhythm...</option>
                     <option value="early-bird">🌅 Early Bird (sunrise energy)</option>
@@ -818,11 +885,12 @@ const ZeyaApp = () => {
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your conversation style</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your conversation style *</label>
                   <select
                     className="w-full px-4 py-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.communicationStyle}
                     onChange={(e) => handleSecureInputChange('communicationStyle', e.target.value)}
+                    required
                   >
                     <option value="">How do you love to connect?</option>
                     <option value="deep-meaningful">💭 Deep & Meaningful (soul-searching)</option>
@@ -832,11 +900,12 @@ const ZeyaApp = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your beautiful energy</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your beautiful energy *</label>
                   <select
                     className="w-full px-4 py-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.personalityType}
                     onChange={(e) => handleSecureInputChange('personalityType', e.target.value)}
+                    required
                   >
                     <option value="">What describes your spirit?</option>
                     <option value="introverted">🌙 Introverted (gentle & thoughtful)</option>
@@ -854,11 +923,12 @@ const ZeyaApp = () => {
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you prefer emotional support?</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you prefer emotional support? *</label>
                   <select
                     className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.emotionalSupport}
                     onChange={(e) => handleSecureInputChange('emotionalSupport', e.target.value)}
+                    required
                   >
                     <option value="">Choose your support style...</option>
                     <option value="warm-empathy">🤗 Warm comfort & empathy</option>
@@ -869,11 +939,12 @@ const ZeyaApp = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you handle stress?</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you handle stress? *</label>
                   <select
                     className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.stressRelief}
                     onChange={(e) => handleSecureInputChange('stressRelief', e.target.value)}
+                    required
                   >
                     <option value="">Your healing method...</option>
                     <option value="alone-time">🛋️ Alone time to recharge</option>
@@ -893,11 +964,12 @@ const ZeyaApp = () => {
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How quickly do you open your heart?</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How quickly do you open your heart? *</label>
                   <select
                     className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.emotionalOpenness}
                     onChange={(e) => handleSecureInputChange('emotionalOpenness', e.target.value)}
+                    required
                   >
                     <option value="">Your emotional timing...</option>
                     <option value="immediate">🌅 Naturally open from the start</option>
@@ -908,11 +980,12 @@ const ZeyaApp = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your ideal relationship dynamic?</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your ideal relationship dynamic? *</label>
                   <select
                     className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
                     value={surveyData.idealRelationship}
                     onChange={(e) => handleSecureInputChange('idealRelationship', e.target.value)}
+                    required
                   >
                     <option value="">Your perfect connection...</option>
                     <option value="devoted-priority">👑 Being each other's top priority</option>
@@ -928,9 +1001,9 @@ const ZeyaApp = () => {
             <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-2xl border border-orange-100">
               <h3 className="text-lg font-semibold text-orange-800 mb-4 flex items-center">
                 <Sparkles className="h-5 w-5 mr-2" />
-                What Makes Your Heart Dance
+                What Makes Your Heart Dance *
               </h3>
-              <p className="text-sm text-gray-600 mb-4">Choose all the beautiful things that bring you joy</p>
+              <p className="text-sm text-gray-600 mb-4">Choose at least one thing that brings you joy</p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {['Music', 'Movies', 'Books', 'Sports', 'Gaming', 'Art', 'Travel', 'Cooking', 'Technology', 'Fitness', 'Photography', 'Nature'].map((interest) => (
                   <label key={interest} className="flex items-center space-x-3 p-3 rounded-xl border-2 border-transparent hover:border-orange-200 hover:bg-white/50 transition-all cursor-pointer">
@@ -1132,18 +1205,26 @@ const ZeyaApp = () => {
             </div>
           </div>
 
-          {/* Debug Info (only shows if survey data exists) */}
-          {surveyData.name && (
-            <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-gray-600">
-              <p><strong>Debug Info:</strong></p>
-              <p>Name: {surveyData.name}</p>
-              <p>Age: {surveyData.age}</p>
-              <p>Country: {surveyData.country}</p>
-              <p>Telegram: {surveyData.telegramUsername}</p>
-              <p>Communication Style: {surveyData.communicationStyle}</p>
-              <p>Interests: {surveyData.interests?.join(', ')}</p>
+          {/* Comprehensive Debug Info */}
+          <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-left text-gray-600">
+            <p><strong>🔍 Registration Summary:</strong></p>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <p><strong>Name:</strong> {surveyData.name || 'Not provided'}</p>
+              <p><strong>Age:</strong> {surveyData.age || 'Not provided'}</p>
+              <p><strong>Country:</strong> {surveyData.country || 'Not provided'}</p>
+              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Not provided'}</p>
+              <p><strong>Life Situation:</strong> {surveyData.lifeSituation || 'Not provided'}</p>
+              <p><strong>Communication:</strong> {surveyData.communicationStyle || 'Not provided'}</p>
+              <p><strong>Personality:</strong> {surveyData.personalityType || 'Not provided'}</p>
+              <p><strong>Schedule:</strong> {surveyData.dailySchedule || 'Not provided'}</p>
+              <p><strong>Emotional Support:</strong> {surveyData.emotionalSupport || 'Not provided'}</p>
+              <p><strong>Stress Relief:</strong> {surveyData.stressRelief || 'Not provided'}</p>
+              <p><strong>Emotional Openness:</strong> {surveyData.emotionalOpenness || 'Not provided'}</p>
+              <p><strong>Ideal Relationship:</strong> {surveyData.idealRelationship || 'Not provided'}</p>
             </div>
-          )}
+            <p className="mt-2"><strong>Interests:</strong> {surveyData.interests?.join(', ') || 'None selected'}</p>
+            <p><strong>Plan:</strong> {selectedPlan?.name || 'Not selected'} (${selectedPlan?.price || 'N/A'})</p>
+          </div>
 
           <button 
             onClick={() => {
@@ -1167,11 +1248,7 @@ const ZeyaApp = () => {
                 emotionalSupport: '',
                 stressRelief: '',
                 emotionalOpenness: '',
-                idealRelationship: '',
-                hobbiesAndActivities: '',
-                personalityTraits: '',
-                communicationFrequency: '',
-                relationshipGoals: ''
+                idealRelationship: ''
               });
             }}
             className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-10 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium text-lg"
