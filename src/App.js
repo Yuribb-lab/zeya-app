@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+\\import React, { useState, useEffect } from 'react';
 import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
 
 // 🤖 Telegram Bot Configuration
@@ -550,26 +550,61 @@ const ZeyaApp = () => {
     }
   };
 
-  // Process customer notifications
+  // Process customer notifications with enhanced reliability
   const processCustomerNotification = async (customerData) => {
-    console.log('🔄 Processing customer notification...');
-    console.log('📋 Customer data received:', customerData);
+    console.log('🔔 STARTING NOTIFICATION PROCESS...');
+    console.log('📊 Notification data:', customerData);
     setCustomerNotificationStatus('sending');
     
     try {
-      // 텔레그램 알림 전송
+      console.log('⏳ Sending Telegram notification...');
       const telegramResult = await sendTelegramNotification(customerData);
+      
+      console.log('📨 Telegram result:', telegramResult);
       
       if (telegramResult.success) {
         setCustomerNotificationStatus('sent');
-        console.log('✅ Customer notification sent successfully');
+        console.log('✅ NOTIFICATION SENT SUCCESSFULLY!');
+        
+        // 성공 로그를 localStorage에도 저장
+        const notificationLog = {
+          timestamp: new Date().toISOString(),
+          status: 'success',
+          customerName: customerData.name,
+          plan: customerData.selectedPlan?.name,
+          telegramResponse: telegramResult.data
+        };
+        localStorage.setItem('zeya_notification_log', JSON.stringify(notificationLog));
+        
       } else {
         setCustomerNotificationStatus('error');
-        console.error('❌ Telegram notification failed:', telegramResult.error);
+        console.error('❌ NOTIFICATION FAILED:', telegramResult.error);
+        
+        // 실패 로그 저장
+        const errorLog = {
+          timestamp: new Date().toISOString(),
+          status: 'failed',
+          customerName: customerData.name,
+          error: telegramResult.error,
+          retryRecommended: true
+        };
+        localStorage.setItem('zeya_notification_error', JSON.stringify(errorLog));
+        
+        // 자동 재시도 (1회)
+        console.log('🔄 Attempting automatic retry...');
+        setTimeout(async () => {
+          const retryResult = await sendTelegramNotification(customerData);
+          if (retryResult.success) {
+            setCustomerNotificationStatus('sent');
+            console.log('✅ RETRY SUCCESSFUL!');
+          } else {
+            console.error('❌ RETRY ALSO FAILED');
+          }
+        }, 3000);
       }
     } catch (error) {
       setCustomerNotificationStatus('error');
-      console.error('❌ Notification processing error:', error);
+      console.error('❌ CRITICAL ERROR in notification process:', error);
     }
   };
 
@@ -662,36 +697,69 @@ const ZeyaApp = () => {
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
     
-    // 완전한 데이터 준비 및 검증
+    console.log('💾 STARTING DATA SAVE PROCESS...');
+    console.log('📊 Current Survey Data:', surveyData);
+    console.log('📋 Selected Plan Data:', selectedPlanData);
+    
+    // 데이터 완전성 검증
+    const requiredFields = ['name', 'age', 'country', 'telegramUsername'];
+    const missingFields = requiredFields.filter(field => !surveyData[field]);
+    
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields);
+      alert(`Missing required information: ${missingFields.join(', ')}\nPlease complete the survey first.`);
+      return;
+    }
+    
+    // 완전한 데이터 준비
     const completeOrderData = {
       selectedPlan: selectedPlanData,
       surveyData: { 
         ...surveyData,
-        // 추가 검증을 위해 현재 timestamp 추가
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
+        savedForPayment: true
       },
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      version: '2.0'
     };
     
-    console.log('💾 Saving COMPLETE order data:', completeOrderData);
+    console.log('📦 Complete order data to save:', completeOrderData);
     
-    // localStorage에 저장
+    // localStorage에 여러 방식으로 저장 (백업)
     try {
-      localStorage.removeItem('zeyaOrderData'); // 기존 데이터 삭제
+      // 기존 데이터 완전 삭제
+      localStorage.removeItem('zeyaOrderData');
+      localStorage.removeItem('zeya_backup');
+      localStorage.removeItem('zeya_survey');
+      localStorage.removeItem('zeya_plan');
+      
+      // 메인 저장
       localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
       
-      // 저장 검증
-      const verification = localStorage.getItem('zeyaOrderData');
-      const parsedVerification = JSON.parse(verification);
-      console.log('✅ Data saved and verified:', parsedVerification);
+      // 백업 저장 (여러 키로)
+      localStorage.setItem('zeya_backup', JSON.stringify(completeOrderData));
+      localStorage.setItem('zeya_survey', JSON.stringify(surveyData));
+      localStorage.setItem('zeya_plan', JSON.stringify(selectedPlanData));
       
-      if (!parsedVerification.surveyData.name) {
-        throw new Error('Critical: Name not saved properly');
+      // 즉시 검증
+      const verification = localStorage.getItem('zeyaOrderData');
+      const backupVerification = localStorage.getItem('zeya_backup');
+      
+      if (!verification || !backupVerification) {
+        throw new Error('Failed to save data to localStorage');
+      }
+      
+      const parsedData = JSON.parse(verification);
+      console.log('✅ Data saved and verified successfully:', parsedData);
+      
+      // 추가 검증
+      if (!parsedData.surveyData.name || !parsedData.selectedPlan.name) {
+        throw new Error('Saved data is incomplete');
       }
       
     } catch (error) {
       console.error('❌ Failed to save order data:', error);
-      alert('Error saving your information. Please try again.');
+      alert('Error saving your information. Please try again or contact support.');
       return;
     }
     
@@ -712,7 +780,13 @@ const ZeyaApp = () => {
         alert('🧪 TEST MODE: This is a test payment. Use test card: 4242 4242 4242 4242');
       }
       
-      window.location.href = stripeUrl;
+      // 리다이렉트 전 마지막 확인
+      setTimeout(() => {
+        const finalCheck = localStorage.getItem('zeyaOrderData');
+        console.log('🔍 Final check before redirect:', finalCheck ? 'Data exists' : 'Data missing');
+        window.location.href = stripeUrl;
+      }, 500);
+      
     } else {
       console.error('❌ No Stripe URL found for plan:', planName);
       alert(`⚠️ Payment link for ${planName} is not configured yet. Please contact support at zeyasupport@zeyalove.com`);
@@ -1242,18 +1316,18 @@ const ZeyaApp = () => {
           <div className="bg-blue-50 p-6 rounded-2xl mb-8 border border-blue-100">
             <h4 className="font-bold text-blue-800 mb-3">📱 Your Companion Will Contact You At:</h4>
             <div className="space-y-2 text-blue-700">
-              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Your provided username'}</p>
-              <p><strong>Plan:</strong> {selectedPlan?.name || 'Selected plan'}</p>
-              <p><strong>Location:</strong> {surveyData.country || 'Your location'}</p>
+              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Please provide your username'}</p>
+              <p><strong>Plan:</strong> {selectedPlan?.name || 'Plan information loading...'}</p>
+              <p><strong>Location:</strong> {surveyData.country || 'Location information loading...'}</p>
               <p className="text-sm mt-3 text-blue-600">
                 💬 <strong>Expected Contact Time:</strong> Within 12 hours of payment confirmation
               </p>
             </div>
           </div>
 
-          {/* Comprehensive Debug Info */}
+          {/* Enhanced Debug Info with Real Data */}
           <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-left text-gray-600">
-            <p><strong>🔍 Registration Summary:</strong></p>
+            <p><strong>🔍 Complete Registration Summary:</strong></p>
             <div className="grid grid-cols-2 gap-2 mt-2">
               <p><strong>Name:</strong> {surveyData.name || 'Not provided'}</p>
               <p><strong>Age:</strong> {surveyData.age || 'Not provided'}</p>
@@ -1268,8 +1342,17 @@ const ZeyaApp = () => {
               <p><strong>Emotional Openness:</strong> {surveyData.emotionalOpenness || 'Not provided'}</p>
               <p><strong>Ideal Relationship:</strong> {surveyData.idealRelationship || 'Not provided'}</p>
             </div>
-            <p className="mt-2"><strong>Interests:</strong> {surveyData.interests?.join(', ') || 'None selected'}</p>
+            <p className="mt-2"><strong>Interests:</strong> {Array.isArray(surveyData.interests) && surveyData.interests.length > 0 ? surveyData.interests.join(', ') : 'None selected'}</p>
             <p><strong>Plan:</strong> {selectedPlan?.name || 'Not selected'} (${selectedPlan?.price || 'N/A'})</p>
+            
+            {/* Data Source Info */}
+            <div className="mt-3 p-2 bg-blue-50 rounded">
+              <p><strong>🔍 Technical Debug:</strong></p>
+              <p>Survey Data Status: {surveyData.name ? '✅ Loaded' : '❌ Missing'}</p>
+              <p>Plan Data Status: {selectedPlan?.name ? '✅ Loaded' : '❌ Missing'}</p>
+              <p>Notification Status: {customerNotificationStatus}</p>
+              <p>LocalStorage Check: {localStorage.getItem('zeyaOrderData') ? '✅ Present' : '❌ Missing'}</p>
+            </div>
           </div>
 
           <button 
