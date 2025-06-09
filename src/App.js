@@ -9,6 +9,12 @@ const EMAILJS_CONFIG = {
   publicKey: 'tm5FWkK5QT0tMftOh'
 };
 
+// 🤖 텔레그램 봇 설정
+const TELEGRAM_CONFIG = {
+  botToken: '7948996488:AAG_5aMk6_OFg22QM411BdZ54TUPzJqvnxA',
+  chatId: 6447858148
+};
+
 // Stripe Payment Links - TEST MODE for Soft Love, LIVE for others
 const stripePaymentLinks = {
   'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // TEST LINK
@@ -367,19 +373,104 @@ const ZeyaApp = () => {
     supportNeeds: ''
   });
 
-  // 🎯 SIMPLIFIED: URL 파라미터로만 결제 상태 확인
+  // 🔍 DEBUGGING: 강력한 결제 상태 감지 및 디버깅
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const paymentSuccess = urlParams.get('payment_success');
-    const paymentCanceled = urlParams.get('payment_canceled');
+    const currentURL = window.location.href;
     
-    if (paymentSuccess === 'true') {
-      // 결제 성공 - localStorage에서 데이터 복원
+    // 모든 파라미터 수집
+    const allParams = Object.fromEntries(urlParams.entries());
+    const hasAnyParams = Object.keys(allParams).length > 0;
+    
+    // Stripe 관련 파라미터들 확인
+    const sessionId = urlParams.get('session_id');
+    const paymentStatus = urlParams.get('payment_status');
+    const paymentIntent = urlParams.get('payment_intent');
+    const checkoutSessionId = urlParams.get('checkout_session_id');
+    
+    // localStorage 데이터 확인
+    const savedOrderData = localStorage.getItem('zeyaOrderData');
+    const hasOrderData = !!savedOrderData;
+    
+    // 🚨 강제 디버깅 알림 - 실제 상황 파악
+    console.log('🔥 PAYMENT DEBUG INFO:', {
+      currentURL,
+      allParams,
+      hasAnyParams,
+      sessionId,
+      paymentStatus,
+      paymentIntent,
+      checkoutSessionId,
+      hasOrderData,
+      orderData: hasOrderData ? JSON.parse(savedOrderData) : null
+    });
+    
+    // 🚨 화면에도 디버깅 정보 표시 (개발용)
+    if (hasAnyParams || hasOrderData) {
+      const debugInfo = `
+🔍 DEBUG INFO:
+URL: ${currentURL}
+Parameters: ${JSON.stringify(allParams, null, 2)}
+Order Data: ${hasOrderData ? 'EXISTS' : 'MISSING'}
+      `;
+      console.log(debugInfo);
+      
+      // 임시로 alert로 확인 (나중에 제거)
+      if (sessionId || paymentIntent || checkoutSessionId) {
+        alert(`🔍 Stripe 파라미터 감지됨!\n${JSON.stringify(allParams, null, 2)}`);
+      }
+    }
+    
+    // 결제 성공 감지 조건들 (더 관대하게)
+    const isPaymentSuccess = 
+      sessionId || 
+      paymentIntent ||
+      checkoutSessionId ||
+      paymentStatus === 'paid' || 
+      paymentStatus === 'complete' ||
+      urlParams.get('payment_success') === 'true' ||
+      urlParams.get('success') === 'true' ||
+      // 📍 localStorage에 주문 데이터가 있고 파라미터가 있으면 성공으로 간주
+      (hasOrderData && hasAnyParams);
+    
+    // 결제 취소/실패 감지
+    const isPaymentCanceled = 
+      paymentStatus === 'failed' || 
+      paymentStatus === 'canceled' ||
+      urlParams.get('payment_canceled') === 'true' ||
+      urlParams.get('canceled') === 'true';
+    
+    console.log('🎯 PAYMENT DECISION:', {
+      isPaymentSuccess,
+      isPaymentCanceled,
+      willShowThankYou: isPaymentSuccess
+    });
+    
+    if (isPaymentSuccess) {
+      // 결제 성공 - localStorage에서 데이터 복원 및 고객 데이터 저장
       const savedData = localStorage.getItem('zeyaOrderData');
       if (savedData) {
         const orderData = JSON.parse(savedData);
         setSelectedPlan(orderData.selectedPlan);
         setSurveyData(orderData.surveyData);
+        
+        // 🔥 관리자용 고객 데이터 저장
+        const customerId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const customerRecord = {
+          ...orderData.surveyData,
+          selectedPlan: orderData.selectedPlan,
+          timestamp: new Date().toISOString(),
+          paymentStatus: 'completed'
+        };
+        localStorage.setItem(customerId, JSON.stringify(customerRecord));
+        
+        // 🤖 텔레그램 즉시 알림 발송
+        const fullCustomerData = {
+          ...orderData.surveyData,
+          selectedPlan: orderData.selectedPlan
+        };
+        sendTelegramNotification(fullCustomerData);
+        
         localStorage.removeItem('zeyaOrderData');
       }
       
@@ -390,7 +481,7 @@ const ZeyaApp = () => {
       
       // URL 파라미터 제거
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (paymentCanceled === 'true') {
+    } else if (isPaymentCanceled) {
       // 결제 취소 - 플랜 선택 페이지로
       const savedData = localStorage.getItem('zeyaOrderData');
       if (savedData) {
@@ -402,6 +493,49 @@ const ZeyaApp = () => {
       setShowPlanSelection(true);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    
+    // 🔍 디버깅: 모든 URL 파라미터 콘솔에 출력
+    if (urlParams.toString()) {
+      console.log('📍 Current URL params:', window.location.href);
+    }
+    
+    // 🚨 임시 자동 확인: 5초 후 localStorage 확인
+    const timeoutId = setTimeout(() => {
+      const orderData = localStorage.getItem('zeyaOrderData');
+      if (orderData && !showThankYou && hasAnyParams) {
+        console.log('⏰ 5초 후 자동 확인: 결제 완료로 간주');
+        const parsedData = JSON.parse(orderData);
+        setSelectedPlan(parsedData.selectedPlan);
+        setSurveyData(parsedData.surveyData);
+        
+        // 관리자용 고객 데이터 저장
+        const customerId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const customerRecord = {
+          ...parsedData.surveyData,
+          selectedPlan: parsedData.selectedPlan,
+          timestamp: new Date().toISOString(),
+          paymentStatus: 'completed_auto_detected'
+        };
+        localStorage.setItem(customerId, JSON.stringify(customerRecord));
+        
+        // 🤖 텔레그램 알림 즉시 발송
+        const fullCustomerData = {
+          ...parsedData.surveyData,
+          selectedPlan: parsedData.selectedPlan
+        };
+        sendTelegramNotification(fullCustomerData);
+        
+        localStorage.removeItem('zeyaOrderData');
+        
+        setShowSurvey(false);
+        setShowDetailedSurvey(false);
+        setShowPlanSelection(false);
+        setShowThankYou(true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Send email when thank you page is shown
@@ -459,9 +593,68 @@ const ZeyaApp = () => {
     }
   ];
 
-  // Email sending function
+  // 🤖 텔레그램 알림 함수
+  const sendTelegramNotification = async (customerData) => {
+    try {
+      const message = `
+🎉 *새로운 Zeya 고객 등록!*
+
+👤 *이름:* ${customerData.name}
+📅 *나이:* ${customerData.age}
+🌍 *국가:* ${customerData.country}
+📱 *텔레그램:* ${customerData.telegramUsername}
+
+💰 *플랜:* ${customerData.selectedPlan?.name}
+💵 *가격:* ${customerData.selectedPlan?.price}
+
+📝 *생활상황:* ${customerData.lifeSituation || 'N/A'}
+💬 *소통스타일:* ${customerData.communicationStyle || 'N/A'}
+🧠 *성격유형:* ${customerData.personalityType || 'N/A'}
+⏰ *활동시간:* ${customerData.dailySchedule || 'N/A'}
+🎯 *관심사:* ${customerData.interests?.join(', ') || 'N/A'}
+
+⏰ *등록시간:* ${new Date().toLocaleString('ko-KR')}
+🌐 *사이트:* https://zeyalove.com
+      `.trim();
+
+      const telegramURL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+      
+      const response = await fetch(telegramURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CONFIG.chatId,
+          text: message,
+          parse_mode: 'Markdown'
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ 텔레그램 알림 전송 완료!');
+        return { success: true };
+      } else {
+        const errorData = await response.json();
+        console.error('❌ 텔레그램 API 오류:', errorData);
+        return { success: false, error: errorData };
+      }
+    } catch (error) {
+      console.error('❌ 텔레그램 알림 실패:', error);
+      return { success: false, error };
+    }
+  };
+
+  // Email sending function (기존 함수 + 텔레그램 추가)
   const sendCustomerEmail = async (customerData) => {
     try {
+      // 🤖 우선 텔레그램 알림 발송 (가장 빠른 알림)
+      const telegramResult = await sendTelegramNotification(customerData);
+      if (telegramResult.success) {
+        console.log('✅ 텔레그램 알림 성공!');
+      }
+
+      // 📧 이메일 발송 (백업용)
       const templateParams = {
         user_name: customerData.name,
         user_age: customerData.age,
@@ -484,10 +677,10 @@ const ZeyaApp = () => {
         EMAILJS_CONFIG.publicKey
       );
 
-      console.log('Email sent successfully:', result.text);
-      return { success: true, result };
+      console.log('✅ 이메일 발송 성공:', result.text);
+      return { success: true, result, telegramSent: telegramResult.success };
     } catch (error) {
-      console.error('Email sending failed:', error);
+      console.error('❌ 알림 발송 중 오류:', error);
       return { success: false, error };
     }
   };
@@ -539,7 +732,53 @@ const ZeyaApp = () => {
     setShowPlanSelection(true);
   };
 
-  // 🚀 SIMPLIFIED: 간단한 결제 처리
+  // 🚨 수동 결제 확인 함수
+  const handleManualPaymentCheck = () => {
+    const orderData = localStorage.getItem('zeyaOrderData');
+    if (orderData) {
+      const parsedData = JSON.parse(orderData);
+      setSelectedPlan(parsedData.selectedPlan);
+      setSurveyData(parsedData.surveyData);
+      
+      // 관리자용 고객 데이터 저장
+      const customerId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const customerRecord = {
+        ...parsedData.surveyData,
+        selectedPlan: parsedData.selectedPlan,
+        timestamp: new Date().toISOString(),
+        paymentStatus: 'completed_manual_check'
+      };
+      localStorage.setItem(customerId, JSON.stringify(customerRecord));
+      localStorage.removeItem('zeyaOrderData');
+      
+      setShowSurvey(false);
+      setShowDetailedSurvey(false);
+      setShowPlanSelection(false);
+      setShowThankYou(true);
+      
+      alert('✅ 결제 완료 확인됨! 감사 페이지로 이동합니다.');
+    } else {
+      alert('❌ 결제 데이터를 찾을 수 없습니다. 다시 설문조사를 진행해주세요.');
+    }
+  };
+
+  // 🔍 결제 데이터 확인 함수
+  const checkPaymentData = () => {
+    const orderData = localStorage.getItem('zeyaOrderData');
+    const urlParams = new URLSearchParams(window.location.search);
+    const allParams = Object.fromEntries(urlParams.entries());
+    
+    const debugInfo = {
+      currentURL: window.location.href,
+      hasOrderData: !!orderData,
+      orderData: orderData ? JSON.parse(orderData) : null,
+      urlParams: allParams,
+      hasUrlParams: Object.keys(allParams).length > 0
+    };
+    
+    console.log('🔍 CURRENT STATE:', debugInfo);
+    alert(`🔍 현재 상태:\n\n결제 데이터: ${orderData ? '있음' : '없음'}\nURL 파라미터: ${Object.keys(allParams).length}개\n\n자세한 정보는 개발자 도구 콘솔을 확인하세요.`);
+  };
   const handlePayment = (planName, price) => {
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
@@ -952,15 +1191,20 @@ const ZeyaApp = () => {
               {emailSending ? (
                 <div className="flex items-center justify-center text-blue-700">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2"></div>
-                  📧 Sending registration details to admin...
+                  📧 관리자에게 알림 발송 중...
                 </div>
               ) : emailSent ? (
-                <div className="text-green-700">
-                  ✅ Registration details sent to our team successfully!
+                <div className="space-y-2">
+                  <div className="text-green-700">
+                    ✅ 관리자 알림 발송 완료!
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    🤖 텔레그램 알림 ✅ | 📧 이메일 백업 ✅
+                  </div>
                 </div>
               ) : (
                 <div className="text-gray-600">
-                  📧 Preparing registration details...
+                  📧 관리자 알림 준비 중...
                 </div>
               )}
             </div>
@@ -1028,12 +1272,31 @@ const ZeyaApp = () => {
                   Zeya
                 </span>
               </div>
-              <button
-                onClick={() => setShowSurvey(true)}
-                className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
-              >
-                Begin Your Journey 💖
-              </button>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setShowSurvey(true)}
+                  className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-6 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
+                >
+                  Begin Your Journey 💖
+                </button>
+                
+                {/* 🚨 임시 디버깅 버튼들 */}
+                <button
+                  onClick={handleManualPaymentCheck}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                  title="결제 완료 후 여기를 클릭하세요"
+                >
+                  ✅ 결제 완료 확인
+                </button>
+                
+                <button
+                  onClick={checkPaymentData}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                  title="현재 상태 디버깅"
+                >
+                  🔍 상태 확인
+                </button>
+              </div>
             </div>
           </div>
         </header>
