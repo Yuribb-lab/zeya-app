@@ -12,9 +12,9 @@ const TELEGRAM_CONFIG = {
 // Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
 // (Cancel URL is not needed - Stripe handles this automatically)
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🔴 LIVE LINK
-  'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
-  'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
+  'Sweet Beginning': 'https://buy.stripe.com/5kQ3cv6YNbSf1axcsa8so02', // 🔴 LIVE LINK
+  'Growing Close': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
+  'Deep Connection': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
   'Soulmate VIP': 'https://buy.stripe.com/5kQeVdaaZ09xaL7gIq8so04'
 };
@@ -450,31 +450,67 @@ const ZeyaApp = () => {
     }
   }, []);
 
-  const plans = [
+   const plans = [
     {
-      name: 'Soft Love',
+      name: 'Sweet Beginning',
       price: 149,
-      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection']
+      features: [
+        'Unlimited text messaging',
+        'Sweet good morning & goodnight messages', 
+        'Gentle emotional support and encouragement',
+        'Personal interest-based conversations',
+        'Basic companionship experience'
+      ]
     },
     {
-      name: 'Romantic',
+      name: 'Growing Close',
       price: 399,
-      features: ['Unlimited text messaging', 'Voice messages twice per week', 'Custom nicknames & interests', 'Personalized conversations']
+      features: [
+        'Unlimited text messaging',
+        'Voice messages to hear her sweet voice',
+        'Custom pet names & shared interests',
+        'Personalized conversations throughout the week',
+        'Photo sharing of special moments'
+      ]
     },
     {
-      name: 'Deep Bond',
+      name: 'Deep Connection',
       price: 799,
-      features: ['Unlimited text messaging', 'Voice messages 3x per week', 'Video clips included', 'Weekly 15-minute video call', 'Monthly personalized video message']
+      features: [
+        'Unlimited text messaging',
+        'Unlimited voice messages',
+        'Regular video clips to see her smile',
+        'Weekly personal video calls (15 minutes)',
+        'Monthly personalized video messages',
+        'Celebration of your special moments'
+      ]
     },
     {
       name: 'Devoted',
       price: 1299,
-      features: ['Unlimited text messaging', 'Voice messages 5x per week', 'Video clips included', 'Two 15-minute video calls weekly', 'Virtual date scenario experiences', 'Special occasion gift reminders']
+      features: [
+        'Unlimited text messaging',
+        'Unlimited voice & video messages',
+        'Twice weekly video calls (15 minutes each)',
+        'Virtual companion experiences together',
+        'Special occasion surprises & reminders',
+        'Deep personal conversations & support',
+        'Priority response to your messages'
+      ]
     },
     {
       name: 'Soulmate VIP',
       price: 1999,
-      features: ['Unlimited text messaging', 'Unlimited voice messaging', 'Daily video clips', 'Two 30-minute video calls weekly', 'Monthly welcome video', 'Personalized "Emotion Album"', 'Priority connection anytime']
+      features: [
+        'Unlimited text messaging',
+        'Unlimited voice & video communication',
+        'Frequent personal video messages',
+        'Extended video calls (30 minutes, twice weekly)',
+        'Monthly friendship milestone videos',
+        'Personalized "Our Journey Album" creation',
+        '24/7 priority connection anytime',
+        'Exclusive companion activities & experiences'
+      ]
     }
   ];
 
