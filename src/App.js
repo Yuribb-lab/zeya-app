@@ -959,4 +959,4 @@ const ZeyaApp = () => {
         <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
       </div>
     );
-  }
+  };
