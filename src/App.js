@@ -12,9 +12,9 @@ const TELEGRAM_CONFIG = {
 // Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
 // (Cancel URL is not needed - Stripe handles this automatically)
 const stripePaymentLinks = {
-  'Sweet Beginning': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🔴 LIVE LINK
-  'Growing Close': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
-  'Deep Connection': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
+  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🔴 LIVE LINK
+  'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
+  'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
   'Soulmate VIP': 'https://buy.stripe.com/5kQeVdaaZ09xaL7gIq8so04'
 };
@@ -452,65 +452,29 @@ const ZeyaApp = () => {
 
   const plans = [
     {
-      name: 'Sweet Beginning',
+      name: 'Soft Love',
       price: 149,
-      features: [
-        'Unlimited text messaging',
-        'Sweet good morning & goodnight messages', 
-        'Gentle emotional support and encouragement',
-        'Personal interest-based conversations',
-        'Basic companionship experience'
-      ]
+      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection']
     },
     {
-      name: 'Growing Close',
+      name: 'Romantic',
       price: 399,
-      features: [
-        'Unlimited text messaging',
-        'Voice messages to hear her sweet voice',
-        'Custom pet names & shared interests',
-        'Personalized conversations throughout the week',
-        'Photo sharing of special moments'
-      ]
+      features: ['Unlimited text messaging', 'Voice messages twice per week', 'Custom nicknames & interests', 'Personalized conversations']
     },
     {
-      name: 'Deep Connection',
+      name: 'Deep Bond',
       price: 799,
-      features: [
-        'Unlimited text messaging',
-        'Unlimited voice messages',
-        'Regular video clips to see her smile',
-        'Weekly personal video calls (15 minutes)',
-        'Monthly personalized video messages',
-        'Celebration of your special moments'
-      ]
+      features: ['Unlimited text messaging', 'Voice messages 3x per week', 'Video clips included', 'Weekly 15-minute video call', 'Monthly personalized video message']
     },
     {
       name: 'Devoted',
       price: 1299,
-      features: [
-        'Unlimited text messaging',
-        'Unlimited voice & video messages',
-        'Twice weekly video calls (15 minutes each)',
-        'Virtual companion experiences together',
-        'Special occasion surprises & reminders',
-        'Deep personal conversations & support',
-        'Priority response to your messages'
-      ]
+      features: ['Unlimited text messaging', 'Voice messages 5x per week', 'Video clips included', 'Two 15-minute video calls weekly', 'Virtual date scenario experiences', 'Special occasion gift reminders']
     },
     {
       name: 'Soulmate VIP',
       price: 1999,
-      features: [
-        'Unlimited text messaging',
-        'Unlimited voice & video communication',
-        'Frequent personal video messages',
-        'Extended video calls (30 minutes, twice weekly)',
-        'Monthly friendship milestone videos',
-        'Personalized "Our Journey Album" creation',
-        '24/7 priority connection anytime',
-        'Exclusive companion activities & experiences'
-      ]
+      features: ['Unlimited text messaging', 'Unlimited voice messaging', 'Daily video clips', 'Two 30-minute video calls weekly', 'Monthly welcome video', 'Personalized "Emotion Album"', 'Priority connection anytime']
     }
   ];
 
@@ -1587,23 +1551,12 @@ const ZeyaApp = () => {
                 <p className="text-gray-600 mb-6">
                   Our team is here to help you find the perfect companion for your emotional journey.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <button 
-                    onClick={() => setShowSurvey(true)}
-                    className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
-                  >
-                    Start Your Journey Today ✨
-                  </button>
-                  <button 
-                    onClick={() => window.open('https://t.me/ZeyaSupportBot', '_blank')}
-                    className="bg-gradient-to-r from-blue-400 to-blue-500 text-white px-8 py-3 rounded-2xl hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium flex items-center space-x-2"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                    </svg>
-                    <span>Get Instant Help on Telegram</span>
-                  </button>
-                </div>
+                <button 
+                  onClick={() => setShowSurvey(true)}
+                  className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
+                >
+                  Start Your Journey Today ✨
+                </button>
               </div>
             </div>
           </div>
