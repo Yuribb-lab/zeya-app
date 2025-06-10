@@ -7,12 +7,9 @@ const TELEGRAM_CONFIG = {
   chatId: 6447858148
 };
 
-// 🚀 Stripe Payment Links for zeyalove.com (LIVE MODE)
-// ⚠️ IMPORTANT: Configure in Stripe Dashboard:
-// Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
-// (Cancel URL is not needed - Stripe handles this automatically)
+// 💳 Stripe Payment Links - 새로운 링크로 업데이트
 const stripePaymentLinks = {
-  'Sweet Beginning': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🔴 LIVE LINK
+  'Sweet Beginning': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03',
   'Growing Close': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Connection': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
@@ -232,7 +229,7 @@ const SupportModal = ({ isOpen, onClose }) => {
         <div className="p-6 space-y-6">
           <div className="text-center">
             <Heart className="h-16 w-16 text-rose-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">We're Here to Help! 💕</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">We're Here to Help! 💆</h3>
             <p className="text-gray-600">Our support team is dedicated to ensuring you have the best experience with Zeya.</p>
           </div>
 
@@ -357,7 +354,7 @@ const ZeyaApp = () => {
     idealRelationship: ''
   });
 
-  // 🔍 Enhanced payment detection with automatic redirect handling
+  // 🔇 Enhanced payment detection with automatic redirect handling
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentURL = window.location.href;
@@ -379,7 +376,7 @@ const ZeyaApp = () => {
                             paymentSuccess === 'true' || success === 'true' ||
                             redirectStatus === 'succeeded';
     
-    console.log('🎯 COMPLETE Payment Detection:', {
+    console.log('💞 COMPLETE Payment Detection:', {
       currentURL,
       allParams,
       sessionId, 
@@ -394,29 +391,29 @@ const ZeyaApp = () => {
     
     // Always log localStorage content
     const savedData = localStorage.getItem('zeyaOrderData');
-    console.log('💾 LocalStorage content:', savedData);
+    console.log('🔶 LocalStorage content:', savedData);
     
     if (isPaymentSuccess) {
-      console.log('💳 Payment success detected, restoring data...');
+      console.log('🔩 Payment success detected, restoring data...');
       
       // 저장된 데이터 복원
       const savedData = localStorage.getItem('zeyaOrderData');
-      console.log('💾 Raw saved data:', savedData);
+      console.log('🔶 Raw saved data:', savedData);
       
       if (savedData) {
         try {
           const orderData = JSON.parse(savedData);
-          console.log('📄 Parsed order data:', orderData);
+          console.log('🎞 Parsed order data:', orderData);
           
           // 즉시 상태 업데이트
           if (orderData.selectedPlan) {
             setSelectedPlan(orderData.selectedPlan);
-            console.log('✅ Plan restored:', orderData.selectedPlan);
+            console.log('📄 Plan restored:', orderData.selectedPlan);
           }
           
           if (orderData.surveyData) {
             setSurveyData(orderData.surveyData);
-            console.log('✅ Survey data restored:', orderData.surveyData);
+            console.log('📄 Survey data restored:', orderData.surveyData);
           }
           
           // 텔레그램 알림 전송
@@ -425,7 +422,7 @@ const ZeyaApp = () => {
             selectedPlan: orderData.selectedPlan
           };
           
-          console.log('📤 Sending notification with full data:', fullCustomerData);
+          console.log('🎾 Sending notification with full data:', fullCustomerData);
           
           // 즉시 알림 처리
           setTimeout(() => {
@@ -517,39 +514,39 @@ const ZeyaApp = () => {
   // 🤖 Enhanced Telegram notification with better error handling
   const sendTelegramNotification = async (customerData) => {
     try {
-      console.log('📤 Starting Telegram notification...');
+      console.log('🎾 Starting Telegram notification...');
       console.log('Customer Data for notification:', customerData);
       
       const message = `
-🎉 *New Zeya Customer Registration!*
+🦦 *New Zeya Customer Registration!*
 
-👤 *Name:* ${customerData.name || 'N/A'}
-📅 *Age:* ${customerData.age || 'N/A'}
-🌍 *Country:* ${customerData.country || 'N/A'}
-📱 *Telegram:* ${customerData.telegramUsername || 'N/A'}
+👀 *Name:* ${customerData.name || 'N/A'}
+🎟 *Age:* ${customerData.age || 'N/A'}
+🙇 *Country:* ${customerData.country || 'N/A'}
+🎑 *Telegram:* ${customerData.telegramUsername || 'N/A'}
 
-💰 *Plan:* ${customerData.selectedPlan?.name || 'N/A'}
-💵 *Price:* $${customerData.selectedPlan?.price || 'N/A'}
+🔥 *Plan:* ${customerData.selectedPlan?.name || 'N/A'}
+🔫 *Price:* $${customerData.selectedPlan?.price || 'N/A'}
 
-📝 *Life Situation:* ${customerData.lifeSituation || 'N/A'}
-💬 *Communication Style:* ${customerData.communicationStyle || 'N/A'}
-🧠 *Personality Type:* ${customerData.personalityType || 'N/A'}
-⏰ *Daily Schedule:* ${customerData.dailySchedule || 'N/A'}
-🎯 *Interests:* ${customerData.interests?.join(', ') || 'N/A'}
+🎷 *Life Situation:* ${customerData.lifeSituation || 'N/A'}
+🔠 *Communication Style:* ${customerData.communicationStyle || 'N/A'}
+🭬 *Personality Type:* ${customerData.personalityType || 'N/A'}
+🌀 *Daily Schedule:* ${customerData.dailySchedule || 'N/A'}
+💞 *Interests:* ${customerData.interests?.join(', ') || 'N/A'}
 
-💖 *Emotional Support:* ${customerData.emotionalSupport || 'N/A'}
-🌸 *Stress Relief:* ${customerData.stressRelief || 'N/A'}
-💕 *Emotional Openness:* ${customerData.emotionalOpenness || 'N/A'}
-👥 *Ideal Relationship:* ${customerData.idealRelationship || 'N/A'}
+🔇 *Emotional Support:* ${customerData.emotionalSupport || 'N/A'}
+🙵 *Stress Relief:* ${customerData.stressRelief || 'N/A'}
+🔆 *Emotional Openness:* ${customerData.emotionalOpenness || 'N/A'}
+🫁 *Ideal Relationship:* ${customerData.idealRelationship || 'N/A'}
 
-⏰ *Registration Time:* ${new Date().toLocaleString('en-US')}
-🌐 *Website:* https://zeyalove.com
+🌀 *Registration Time:* ${new Date().toLocaleString('en-US')}
+🙋 *Website:* https://zeyalove.com
       `.trim();
 
-      console.log('📝 Message to send:', message);
+      console.log('🎷 Message to send:', message);
       
       const telegramURL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
-      console.log('🌐 Telegram URL:', telegramURL);
+      console.log('🙋 Telegram URL:', telegramURL);
       
       const requestBody = {
         chat_id: TELEGRAM_CONFIG.chatId,
@@ -557,7 +554,7 @@ const ZeyaApp = () => {
         parse_mode: 'Markdown'
       };
       
-      console.log('📦 Request body:', requestBody);
+      console.log('🎀 Request body:', requestBody);
       
       const response = await fetch(telegramURL, {
         method: 'POST',
@@ -568,12 +565,12 @@ const ZeyaApp = () => {
       });
 
       const responseData = await response.json();
-      console.log('📨 Telegram Response:', responseData);
-      console.log('📊 Response status:', response.status);
-      console.log('✅ Response ok:', response.ok);
+      console.log('🎂 Telegram Response:', responseData);
+      console.log('🎤 Response status:', response.status);
+      console.log('📄 Response ok:', response.ok);
 
       if (response.ok && responseData.ok) {
-        console.log('✅ Telegram notification sent successfully!');
+        console.log('📄 Telegram notification sent successfully!');
         return { success: true, data: responseData };
       } else {
         console.error('❌ Telegram API error:', responseData);
@@ -587,19 +584,19 @@ const ZeyaApp = () => {
 
   // Process customer notifications with enhanced reliability
   const processCustomerNotification = async (customerData) => {
-    console.log('🔔 STARTING NOTIFICATION PROCESS...');
-    console.log('📊 Notification data:', customerData);
+    console.log('🔒 STARTING NOTIFICATION PROCESS...');
+    console.log('🎤 Notification data:', customerData);
     setCustomerNotificationStatus('sending');
     
     try {
-      console.log('⏳ Sending Telegram notification...');
+      console.log('📄 Sending Telegram notification...');
       const telegramResult = await sendTelegramNotification(customerData);
       
-      console.log('📨 Telegram result:', telegramResult);
+      console.log('🎂 Telegram result:', telegramResult);
       
       if (telegramResult.success) {
         setCustomerNotificationStatus('sent');
-        console.log('✅ NOTIFICATION SENT SUCCESSFULLY!');
+        console.log('📄 NOTIFICATION SENT SUCCESSFULLY!');
         
         // 성공 로그를 localStorage에도 저장
         const notificationLog = {
@@ -625,13 +622,13 @@ const ZeyaApp = () => {
         };
         localStorage.setItem('zeya_notification_error', JSON.stringify(errorLog));
         
-        // 자동 재시도 (1회)
-        console.log('🔄 Attempting automatic retry...');
+        // 자동 재시도 (1번)
+        console.log('🎽 Attempting automatic retry...');
         setTimeout(async () => {
           const retryResult = await sendTelegramNotification(customerData);
           if (retryResult.success) {
             setCustomerNotificationStatus('sent');
-            console.log('✅ RETRY SUCCESSFUL!');
+            console.log('📄 RETRY SUCCESSFUL!');
           } else {
             console.error('❌ RETRY ALSO FAILED');
           }
@@ -688,7 +685,7 @@ const ZeyaApp = () => {
       return;
     }
     
-    console.log('✅ Basic info submitted:', surveyData);
+    console.log('📄 Basic info submitted:', surveyData);
     setShowSurvey(false);
     setShowDetailedSurvey(true);
   };
@@ -723,7 +720,7 @@ const ZeyaApp = () => {
       return;
     }
     
-    console.log('✅ Detailed survey submitted:', surveyData);
+    console.log('📄 Detailed survey submitted:', surveyData);
     setShowDetailedSurvey(false);
     setShowPlanSelection(true);
   };
@@ -732,9 +729,9 @@ const ZeyaApp = () => {
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
     
-    console.log('💾 STARTING DATA SAVE PROCESS...');
-    console.log('📊 Current Survey Data:', surveyData);
-    console.log('📋 Selected Plan Data:', selectedPlanData);
+    console.log('🔶 STARTING DATA SAVE PROCESS...');
+    console.log('🎤 Current Survey Data:', surveyData);
+    console.log('🎥 Selected Plan Data:', selectedPlanData);
     
     // 데이터 완전성 검증
     const requiredFields = ['name', 'age', 'country', 'telegramUsername'];
@@ -758,11 +755,11 @@ const ZeyaApp = () => {
       version: '2.0'
     };
     
-    console.log('📦 Complete order data to save:', completeOrderData);
+    console.log('🎀 Complete order data to save:', completeOrderData);
     
     // localStorage에 여러 방식으로 저장 (백업)
     try {
-      // 기존 데이터 완전 삭제
+      // 기존 데이터 완전 제거
       localStorage.removeItem('zeyaOrderData');
       localStorage.removeItem('zeya_backup');
       localStorage.removeItem('zeya_survey');
@@ -771,7 +768,7 @@ const ZeyaApp = () => {
       // 메인 저장
       localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
       
-      // 백업 저장 (여러 키로)
+      // 백업 저장 (여러 경로)
       localStorage.setItem('zeya_backup', JSON.stringify(completeOrderData));
       localStorage.setItem('zeya_survey', JSON.stringify(surveyData));
       localStorage.setItem('zeya_plan', JSON.stringify(selectedPlanData));
@@ -785,7 +782,7 @@ const ZeyaApp = () => {
       }
       
       const parsedData = JSON.parse(verification);
-      console.log('✅ Data saved and verified successfully:', parsedData);
+      console.log('📄 Data saved and verified successfully:', parsedData);
       
       // 추가 검증
       if (!parsedData.surveyData.name || !parsedData.selectedPlan.name) {
@@ -801,18 +798,18 @@ const ZeyaApp = () => {
     // Stripe 결제로 리다이렉트
     const stripeUrl = stripePaymentLinks[planName];
     
-    console.log('🔗 Available Stripe Links:', stripePaymentLinks);
-    console.log(`🎯 Selected plan: ${planName}`);
-    console.log(`💳 Stripe URL for ${planName}:`, stripeUrl);
+    console.log('🔕 Available Stripe Links:', stripePaymentLinks);
+    console.log(`💞 Selected plan: ${planName}`);
+    console.log(`🔩 Stripe URL for ${planName}:`, stripeUrl);
     
     if (stripeUrl) {
-      console.log(`🚀 Redirecting to ${planName} payment...`);
-      console.log(`📍 Full redirect URL: ${stripeUrl}`);
+      console.log(`📄 Redirecting to ${planName} payment...`);
+      console.log(`🎧 Full redirect URL: ${stripeUrl}`);
       
       // 리다이렉트 전 마지막 확인
       setTimeout(() => {
         const finalCheck = localStorage.getItem('zeyaOrderData');
-        console.log('🔍 Final check before redirect:', finalCheck ? 'Data exists' : 'Data missing');
+        console.log('🔇 Final check before redirect:', finalCheck ? 'Data exists' : 'Data missing');
         window.location.href = stripeUrl;
       }, 500);
       
@@ -829,7 +826,7 @@ const ZeyaApp = () => {
         <div className="max-w-2xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 border border-rose-200">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-4">
-              AI Personality Assessment 💫
+              AI Personality Assessment 🔟
             </h2>
             <p className="text-gray-600">Help our advanced AI understand your unique personality to find your perfect companion match</p>
           </div>
@@ -889,7 +886,7 @@ const ZeyaApp = () => {
                     <option value="NL">Netherlands 🇳🇱</option>
                     <option value="SE">Sweden 🇸🇪</option>
                     <option value="NO">Norway 🇳🇴</option>
-                    <option value="OTHER">Other ✨</option>
+                    <option value="OTHER">Other 🌍</option>
                   </select>
                 </div>
                 <div>
@@ -903,7 +900,7 @@ const ZeyaApp = () => {
                     required
                   />
                   {errors.telegramUsername && <p className="text-red-500 text-xs mt-1">{errors.telegramUsername}</p>}
-                  <p className="text-xs text-rose-600 mt-1">Required: This is how your companion will reach you ✨</p>
+                  <p className="text-xs text-rose-600 mt-1">Required: This is how your companion will reach you 💄</p>
                 </div>
               </div>
             </div>
@@ -944,14 +941,14 @@ const ZeyaApp = () => {
                 onClick={() => setShowSurvey(false)}
                 className="flex-1 px-8 py-4 border-2 border-gray-300 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-medium"
               >
-                Maybe Later 🤔
+                Maybe Later 🤺
               </button>
               <button
                 onClick={handleBasicInfoSubmit}
                 disabled={!agreedToTerms || !surveyData.name || !surveyData.age || !surveyData.country || !surveyData.telegramUsername}
                 className="flex-1 bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                Continue to AI Analysis 🧠
+                Continue to AI Analysis 🭬
               </button>
             </div>
           </div>
@@ -963,720 +960,3 @@ const ZeyaApp = () => {
       </div>
     );
   }
-
-  // Detailed Survey Component
-  if (showDetailedSurvey) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 max-h-[90vh] overflow-y-auto border border-rose-200">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-4">
-              Advanced Compatibility Analysis, {surveyData.name} 🧠
-            </h2>
-            <p className="text-gray-600">Our AI needs deeper insights to calculate your perfect compatibility match with 95% accuracy</p>
-          </div>
-          
-          <div className="space-y-8">
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100">
-              <h3 className="text-lg font-semibold text-purple-800 mb-4 flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                Your Life's Beautiful Rhythm
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">What fills your days? *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.lifeSituation}
-                    onChange={(e) => handleSecureInputChange('lifeSituation', e.target.value)}
-                    required
-                  >
-                    <option value="">Your current chapter...</option>
-                    <option value="student">📚 Student (learning & growing)</option>
-                    <option value="working">💼 Working Professional</option>
-                    <option value="entrepreneur">🚀 Entrepreneur (chasing dreams)</option>
-                    <option value="between-jobs">🌟 Between Adventures</option>
-                    <option value="retired">🌺 Enjoying Life's Rewards</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">When do you shine brightest? *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.dailySchedule}
-                    onChange={(e) => handleSecureInputChange('dailySchedule', e.target.value)}
-                    required
-                  >
-                    <option value="">Your natural rhythm...</option>
-                    <option value="early-bird">🌅 Early Bird (sunrise energy)</option>
-                    <option value="regular">☀️ Regular Hours (steady flow)</option>
-                    <option value="night-owl">🌙 Night Owl (moonlight magic)</option>
-                    <option value="irregular">🎭 Irregular (spontaneous soul)</option>
-                    <option value="flexible">🌈 Flexible (adaptable heart)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-100">
-              <h3 className="text-lg font-semibold text-emerald-800 mb-4 flex items-center">
-                <MessageCircle className="h-5 w-5 mr-2" />
-                How Your Soul Speaks
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your conversation style *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.communicationStyle}
-                    onChange={(e) => handleSecureInputChange('communicationStyle', e.target.value)}
-                    required
-                  >
-                    <option value="">How do you love to connect?</option>
-                    <option value="deep-meaningful">💭 Deep & Meaningful (soul-searching)</option>
-                    <option value="light-casual">🌸 Light & Casual (easy-going)</option>
-                    <option value="humorous-playful">😄 Humorous & Playful (joyful spirit)</option>
-                    <option value="mix-all">🎨 Mix of All (colorful conversations)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your beautiful energy *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.personalityType}
-                    onChange={(e) => handleSecureInputChange('personalityType', e.target.value)}
-                    required
-                  >
-                    <option value="">What describes your spirit?</option>
-                    <option value="introverted">🌙 Introverted (gentle & thoughtful)</option>
-                    <option value="extroverted">☀️ Extroverted (bright & social)</option>
-                    <option value="balanced">⚖️ Balanced (harmonious blend)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100">
-              <h3 className="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
-                <Heart className="h-5 w-5 mr-2" />
-                Your Emotional Journey
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you prefer emotional support? *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.emotionalSupport}
-                    onChange={(e) => handleSecureInputChange('emotionalSupport', e.target.value)}
-                    required
-                  >
-                    <option value="">Choose your support style...</option>
-                    <option value="warm-empathy">🤗 Warm comfort & empathy</option>
-                    <option value="practical-advice">💡 Practical advice & solutions</option>
-                    <option value="quiet-listening">👂 Quiet listening & presence</option>
-                    <option value="humor-energy">🌈 Humor & positive energy</option>
-                    <option value="companionship">🤝 Simply being there together</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How do you handle stress? *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.stressRelief}
-                    onChange={(e) => handleSecureInputChange('stressRelief', e.target.value)}
-                    required
-                  >
-                    <option value="">Your healing method...</option>
-                    <option value="alone-time">🛋️ Alone time to recharge</option>
-                    <option value="social-connection">👫 Talking with people</option>
-                    <option value="physical-activity">🏃‍♀️ Exercise & movement</option>
-                    <option value="mindful-arts">🧘‍♀️ Meditation, music, arts</option>
-                    <option value="new-environment">🎪 New places & experiences</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-2xl border border-pink-100">
-              <h3 className="text-lg font-semibold text-pink-800 mb-4 flex items-center">
-                <Users className="h-5 w-5 mr-2" />
-                Your Heart's Desires
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How quickly do you open your heart? *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.emotionalOpenness}
-                    onChange={(e) => handleSecureInputChange('emotionalOpenness', e.target.value)}
-                    required
-                  >
-                    <option value="">Your emotional timing...</option>
-                    <option value="immediate">🌅 Naturally open from the start</option>
-                    <option value="few-days">🌤️ After a few days of chatting</option>
-                    <option value="few-weeks">🌙 After weeks of building trust</option>
-                    <option value="few-months">🌌 Slowly over several months</option>
-                    <option value="situational">🎭 Depends on the feeling & situation</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your ideal relationship dynamic? *</label>
-                  <select
-                    className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-transparent bg-white/70 transition-all"
-                    value={surveyData.idealRelationship}
-                    onChange={(e) => handleSecureInputChange('idealRelationship', e.target.value)}
-                    required
-                  >
-                    <option value="">Your perfect connection...</option>
-                    <option value="devoted-priority">👑 Being each other's top priority</option>
-                    <option value="growth-partnership">🌱 Growing & evolving together</option>
-                    <option value="stable-comfort">🏠 Comfortable, stable daily sharing</option>
-                    <option value="passionate-romantic">🎭 Passionate & deeply romantic</option>
-                    <option value="independent-support">🤝 Independent yet supportive</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-2xl border border-orange-100">
-              <h3 className="text-lg font-semibold text-orange-800 mb-4 flex items-center">
-                <Sparkles className="h-5 w-5 mr-2" />
-                What Makes Your Heart Dance *
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">Choose at least one thing that brings you joy</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {['Music', 'Movies', 'Books', 'Sports', 'Gaming', 'Art', 'Travel', 'Cooking', 'Technology', 'Fitness', 'Photography', 'Nature'].map((interest) => (
-                  <label key={interest} className="flex items-center space-x-3 p-3 rounded-xl border-2 border-transparent hover:border-orange-200 hover:bg-white/50 transition-all cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="w-5 h-5 text-orange-500 rounded focus:ring-orange-300"
-                      checked={surveyData.interests.includes(interest)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSurveyData({...surveyData, interests: [...surveyData.interests, interest]});
-                        } else {
-                          setSurveyData({...surveyData, interests: surveyData.interests.filter(i => i !== interest)});
-                        }
-                      }}
-                    />
-                    <span className="text-sm font-medium">{interest}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex gap-4 pt-6">
-              <button
-                onClick={() => {
-                  setShowDetailedSurvey(false);
-                  setShowSurvey(true);
-                }}
-                className="flex-1 px-8 py-4 border-2 border-gray-300 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-medium"
-              >
-                Back to Basic Info
-              </button>
-              <button
-                onClick={handleDetailedSurveySubmit}
-                disabled={loading}
-                className="flex-1 bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {loading ? 'AI Processing Your Profile...' : 'Complete AI Matching 🎯'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Plan Selection Component
-  if (showPlanSelection) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
-              Your AI Match is Ready! 🎯
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our AI has analyzed your personality and found your perfect companion match, {surveyData.name}! Choose your preferred connection level to begin.
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 gap-8 mb-12">
-            {plans.map((plan, index) => (
-              <div key={index} className={`rounded-3xl p-8 shadow-2xl transition-all duration-500 hover:shadow-3xl hover:-translate-y-3 ${
-                index === 2 
-                  ? 'ring-4 ring-rose-300 bg-gradient-to-br from-rose-50 to-pink-50 transform scale-105' 
-                  : 'bg-white/90 backdrop-blur-lg hover:bg-rose-50/50'
-              } border border-rose-100 relative`}>
-
-                <div className="text-center mb-8">
-                  <Heart className={`h-10 w-10 mx-auto mb-4 ${index === 2 ? 'text-rose-500 fill-rose-500' : 'text-rose-400'}`} />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-3">{plan.name}</h3>
-                  <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-2">
-                    ${plan.price}
-                  </div>
-                  <div className="text-gray-600">per month</div>
-                  {index === 2 && (
-                    <div className="mt-3">
-                      <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium">
-                        Most Popular ✨
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <ul className="space-y-4 mb-10">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start">
-                      <Heart className="h-5 w-5 text-rose-400 mt-1 mr-3 flex-shrink-0" />
-                      <span className="text-sm text-gray-600 leading-relaxed">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => handlePayment(plan.name, plan.price)}
-                  disabled={loading}
-                  className={`w-full py-4 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    index === 2 
-                      ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white hover:from-rose-600 hover:to-pink-600 shadow-xl hover:shadow-2xl'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gradient-to-r hover:from-rose-400 hover:to-pink-400 hover:text-white'
-                  }`}
-                >
-                  Choose This Plan ✨
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <button
-              onClick={() => {
-                setShowPlanSelection(false);
-                setShowDetailedSurvey(true);
-              }}
-              className="px-8 py-3 border-2 border-gray-300 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-medium"
-            >
-              Back to Survey
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Thank You Component
-  if (showThankYou) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 text-center border border-rose-200">
-          <div className="text-8xl mb-6">🎉</div>
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
-            Payment Successful, {surveyData.name || 'valued customer'}!
-          </h1>
-          
-          {/* Payment Success Alert */}
-          <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <div className="bg-green-500 rounded-full p-3">
-                <Heart className="h-8 w-8 text-white" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-green-800 mb-3">✅ Your Payment is Complete!</h2>
-            <p className="text-green-700 text-lg">
-              🤖 Our AI matching system is now preparing your perfect companion match!
-            </p>
-            
-            {/* Professional Notification Status */}
-            <div className="mt-4 p-3 bg-white rounded-xl border border-green-200">
-              {customerNotificationStatus === 'sending' && (
-                <div className="flex items-center justify-center text-blue-700">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2"></div>
-                  Processing order confirmation...
-                </div>
-              )}
-              {customerNotificationStatus === 'sent' && (
-                <div className="space-y-2">
-                  <div className="text-green-700">
-                    ✅ Order confirmation processed successfully
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Customer service team has been notified of your registration
-                  </div>
-                </div>
-              )}
-              {customerNotificationStatus === 'error' && (
-                <div className="text-red-700">
-                  ⚠️ Notification processing delayed - Please contact support if needed
-                </div>
-              )}
-              {customerNotificationStatus === 'pending' && (
-                <div className="text-gray-600">
-                  🔄 Preparing order confirmation...
-                </div>
-              )}
-            </div>
-          </div>
-
-          <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            🎯 <strong>Next Steps:</strong> Our advanced AI has analyzed your personality profile and is finalizing your perfect companion match. 
-            You'll receive a private Telegram message within 12 hours to begin your emotional journey.
-          </p>
-
-          {selectedPlan && (
-            <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-6 rounded-2xl mb-8 border border-rose-100">
-              <h3 className="text-lg font-bold text-rose-800 mb-2">
-                ✨ Your Active {selectedPlan.name} Plan
-              </h3>
-              <p className="text-rose-600">Monthly subscription: ${selectedPlan.price}</p>
-              <p className="text-sm text-rose-700 mt-2">🎯 Compatibility Score: 95%+ • Perfect Match Guaranteed</p>
-            </div>
-          )}
-
-          <div className="bg-blue-50 p-6 rounded-2xl mb-8 border border-blue-100">
-            <h4 className="font-bold text-blue-800 mb-3">📱 Your Companion Will Contact You At:</h4>
-            <div className="space-y-2 text-blue-700">
-              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Please provide your username'}</p>
-              <p><strong>Plan:</strong> {selectedPlan?.name || 'Plan information loading...'}</p>
-              <p><strong>Location:</strong> {surveyData.country || 'Location information loading...'}</p>
-              <p className="text-sm mt-3 text-blue-600">
-                💬 <strong>Expected Contact Time:</strong> Within 12 hours of payment confirmation
-              </p>
-            </div>
-          </div>
-
-          {/* Enhanced Debug Info with Real Data */}
-          <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-left text-gray-600">
-            <p><strong>🔍 Complete Registration Summary:</strong></p>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <p><strong>Name:</strong> {surveyData.name || 'Not provided'}</p>
-              <p><strong>Age:</strong> {surveyData.age || 'Not provided'}</p>
-              <p><strong>Country:</strong> {surveyData.country || 'Not provided'}</p>
-              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Not provided'}</p>
-              <p><strong>Life Situation:</strong> {surveyData.lifeSituation || 'Not provided'}</p>
-              <p><strong>Communication:</strong> {surveyData.communicationStyle || 'Not provided'}</p>
-              <p><strong>Personality:</strong> {surveyData.personalityType || 'Not provided'}</p>
-              <p><strong>Schedule:</strong> {surveyData.dailySchedule || 'Not provided'}</p>
-              <p><strong>Emotional Support:</strong> {surveyData.emotionalSupport || 'Not provided'}</p>
-              <p><strong>Stress Relief:</strong> {surveyData.stressRelief || 'Not provided'}</p>
-              <p><strong>Emotional Openness:</strong> {surveyData.emotionalOpenness || 'Not provided'}</p>
-              <p><strong>Ideal Relationship:</strong> {surveyData.idealRelationship || 'Not provided'}</p>
-            </div>
-            <p className="mt-2"><strong>Interests:</strong> {Array.isArray(surveyData.interests) && surveyData.interests.length > 0 ? surveyData.interests.join(', ') : 'None selected'}</p>
-            <p><strong>Plan:</strong> {selectedPlan?.name || 'Not selected'} (${selectedPlan?.price || 'N/A'})</p>
-            
-            {/* Data Source Info */}
-            <div className="mt-3 p-2 bg-blue-50 rounded">
-              <p><strong>🔍 Technical Debug:</strong></p>
-              <p>Survey Data Status: {surveyData.name ? '✅ Loaded' : '❌ Missing'}</p>
-              <p>Plan Data Status: {selectedPlan?.name ? '✅ Loaded' : '❌ Missing'}</p>
-              <p>Notification Status: {customerNotificationStatus}</p>
-              <p>LocalStorage Check: {localStorage.getItem('zeyaOrderData') ? '✅ Present' : '❌ Missing'}</p>
-            </div>
-          </div>
-
-          <button 
-            onClick={() => {
-              setShowThankYou(false);
-              setShowSurvey(false);
-              setShowDetailedSurvey(false);
-              setShowPlanSelection(false);
-              setSelectedPlan(null);
-              setCustomerNotificationStatus('pending');
-              localStorage.removeItem('zeyaOrderData');
-              setSurveyData({
-                name: '',
-                age: '',
-                country: '',
-                telegramUsername: '',
-                lifeSituation: '',
-                communicationStyle: '',
-                personalityType: '',
-                dailySchedule: '',
-                interests: [],
-                emotionalSupport: '',
-                stressRelief: '',
-                emotionalOpenness: '',
-                idealRelationship: ''
-              });
-            }}
-            className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-10 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium text-lg"
-          >
-            Explore More About Zeya 🌟
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Main Homepage
-  return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50">
-        {/* Header */}
-        <header className="bg-white/90 backdrop-blur-lg shadow-lg border-b border-rose-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-3">
-                <Heart className="h-10 w-10 text-rose-500" />
-                <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">
-                  Zeya
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setShowSurvey(true)}
-                  className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-6 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
-                >
-                  Begin Your Journey 💖
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Hero Section */}
-        <section className="py-24 relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h1 className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-pink-600 to-orange-500 mb-8 leading-tight">
-              Where Hearts Find <br/>
-              <span className="text-rose-500">Real Connection</span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Experience genuine friendship and emotional support with real verified companions matched by our advanced AI algorithm. 
-              Our sophisticated matching system analyzes 50+ personality dimensions to find your perfect emotional companion.
-            </p>
-            <button
-              onClick={() => setShowSurvey(true)}
-              className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-10 py-5 rounded-3xl text-xl font-semibold hover:from-rose-600 hover:to-pink-600 transition-all duration-300 shadow-2xl transform hover:-translate-y-2"
-            >
-              Find Your Perfect Companion ✨
-            </button>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="py-20 bg-white/60 backdrop-blur relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl font-bold text-gray-800 mb-4">Why Choose Zeya?</h2>
-              <p className="text-xl text-gray-600">Experience authentic emotional connections with real people</p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 border border-rose-100 hover:bg-white/90 transition-all duration-300 shadow-lg">
-                <Sparkles className="w-12 h-12 text-pink-500 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">AI-Powered Matching</h3>
-                <p className="text-gray-600">Our advanced AI analyzes 50+ personality dimensions, communication styles, and emotional needs to find your perfect companion match with 95% compatibility.</p>
-              </div>
-              
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 border border-purple-100 hover:bg-white/90 transition-all duration-300 shadow-lg">
-                <Shield className="w-12 h-12 text-purple-500 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">100% Safe-for-Work</h3>
-                <p className="text-gray-600">Pure emotional intimacy with no sexual content. Focus on meaningful conversations and personal growth through authentic friendship.</p>
-              </div>
-              
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 border border-indigo-100 hover:bg-white/90 transition-all duration-300 shadow-lg">
-                <Users className="w-12 h-12 text-indigo-500 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Verified Companions</h3>
-                <p className="text-gray-600">Connect with carefully screened, real women who specialize in emotional support and are trained in active listening and empathetic communication.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Emotional Benefits Section */}
-        <section className="py-20 bg-gradient-to-br from-pink-50 via-rose-50 to-orange-50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-16">
-              The Beautiful Moments You'll Discover
-            </h2>
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-rose-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">📱</div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  That flutter in your heart when you see her <span className="text-rose-600 font-semibold">"Good morning, beautiful"</span> text
-                </p>
-              </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-pink-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">💭</div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  The gentle warmth of someone asking <span className="text-pink-600 font-semibold">"How was your day, sweetheart?"</span>
-                </p>
-              </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">🌙</div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  The peaceful comfort of her soft <span className="text-purple-600 font-semibold">"Sweet dreams"</span> before you sleep
-                </p>
-              </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-orange-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">🎉</div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  The pure joy of someone being <span className="text-orange-600 font-semibold">genuinely excited</span> about your achievements
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Journey Steps */}
-        <section className="py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
-                AI-Powered Perfect Matching Process
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Four scientific steps to finding your emotionally compatible companion through advanced AI analysis
-              </p>
-            </div>
-            <div className="grid md:grid-cols-4 gap-8">
-              {[
-                { icon: Users, title: 'Deep Personality Analysis', desc: 'Complete our comprehensive 50+ question assessment covering personality, values, and emotional needs' },
-                { icon: Sparkles, title: 'AI Matching Algorithm', desc: 'Our advanced AI analyzes your data to find the perfect companion with 95%+ compatibility' },
-                { icon: Shield, title: 'Choose Your Connection', desc: 'Select your preferred intimacy level and communication frequency' },
-                { icon: MessageCircle, title: 'Meet Your Perfect Match', desc: 'Connect with your scientifically-matched companion within 12 hours' }
-              ].map((step, index) => (
-                <div key={index} className="text-center group">
-                  <div className="bg-gradient-to-br from-rose-100 to-pink-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-xl">
-                    <step.icon className="h-12 w-12 text-gray-700" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-800">{step.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{step.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
-                Frequently Asked Questions
-              </h2>
-              <p className="text-xl text-gray-600">
-                Everything you need to know about your beautiful journey with Zeya
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                {
-                  question: "How does your AI matching algorithm work? 🤖",
-                  answer: "Our proprietary AI analyzes 50+ data points including personality traits, communication styles, emotional needs, values, lifestyle preferences, and relationship goals. Using advanced machine learning, we calculate compatibility scores and match you with companions who complement your unique psychological profile. Our algorithm has a 95% satisfaction rate."
-                },
-                {
-                  question: "How is Zeya different from platforms like OnlyFans? 🌟",
-                  answer: "Zeya is a 100% Safe-for-Work (SFW) platform focused exclusively on emotional connection and meaningful relationships. Unlike adult platforms, we offer no sexual content whatsoever. Instead, we provide deeper emotional intimacy through genuine conversation, personal growth support, and authentic companionship that goes beyond surface-level interactions."
-                },
-                {
-                  question: "What makes your emotional connections deeper than other platforms? 💝",
-                  answer: "By removing sexual elements entirely, we create space for profound emotional intimacy. Our AI-matched companions focus on understanding your thoughts, dreams, fears, and aspirations. You'll experience genuine care, personalized attention, and meaningful conversations that help you grow as a person while feeling truly understood and valued."
-                },
-                {
-                  question: "How accurate is the AI matching process? 🎯",
-                  answer: "Our AI matching system has been trained on thousands of successful companion relationships and achieves a 95% compatibility rate. The comprehensive assessment analyzes psychological compatibility, communication styles, emotional needs, and lifestyle factors to ensure optimal matches. If you're not satisfied with your match within the first week, we offer free re-matching."
-                },
-                {
-                  question: "What type of conversations can I have? 💬",
-                  answer: "All conversations focus on emotional support, friendship, life advice, motivation, and meaningful companionship. Think of it like having a caring friend who's always there to listen, encourage, and support you through life's journey. We maintain strict SFW guidelines to ensure deep, meaningful connections."
-                },
-                {
-                  question: "Are these real people or AI? 👥",
-                  answer: "All our companions are real, verified women who specialize in providing emotional support and friendship. We use AI only for the initial matching process to ensure compatibility based on personality and communication style. Your conversations are always with real humans."
-                },
-                {
-                  question: "What happens after I make a payment? ⏰",
-                  answer: "Within 12 hours of payment confirmation, you'll receive a private Telegram message from your AI-matched companion. She'll introduce herself and begin providing emotional support and friendship according to your chosen plan and compatibility profile."
-                }
-              ].map((faq, index) => (
-                <div key={index} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
-                  <button
-                    onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
-                    className="w-full px-8 py-6 text-left flex justify-between items-center hover:bg-rose-50/50 transition-all duration-200"
-                  >
-                    <h3 className="text-lg font-semibold text-gray-800 pr-4">{faq.question}</h3>
-                    <ChevronDown 
-                      className={`h-6 w-6 text-rose-500 transform transition-transform duration-300 flex-shrink-0 ${
-                        openFAQ === index ? 'rotate-180' : ''
-                      }`} 
-                    />
-                  </button>
-                  {openFAQ === index && (
-                    <div className="px-8 pb-6">
-                      <div className="border-t border-rose-100 pt-4">
-                        <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center mt-12">
-              <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-8 border border-rose-100">
-                <h3 className="text-2xl font-bold text-rose-800 mb-4">Still Have Questions? 💖</h3>
-                <p className="text-gray-600 mb-6">
-                  Our team is here to help you find the perfect companion for your emotional journey.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <button 
-                    onClick={() => setShowSurvey(true)}
-                    className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
-                  >
-                    Start Your Journey Today ✨
-                  </button>
-                  <button 
-                    onClick={() => window.open('https://t.me/ZeyaSupportBot', '_blank')}
-                    className="bg-gradient-to-r from-blue-400 to-blue-500 text-white px-8 py-3 rounded-2xl hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium flex items-center space-x-2"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                    </svg>
-                    <span>Get Instant Help on Telegram</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <div className="flex items-center justify-center space-x-3 mb-6">
-                <Heart className="h-12 w-12 text-rose-400" />
-                <span className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-pink-400">
-                  Zeya
-                </span>
-              </div>
-              <p className="text-gray-300 leading-relaxed text-lg max-w-2xl mx-auto">
-                Creating meaningful connections through authentic friendship with real companions who care. 
-                100% Safe-for-Work platform dedicated to emotional support and genuine relationships.
-              </p>
-            </div>
-            <div className="flex flex-col md:flex-row justify-between items-center border-t border-gray-700 pt-8">
-              <p className="text-gray-400 mb-4 md:mb-0">© 2024 Zeya. Made with ❤️ for meaningful connections.</p>
-              <div className="flex items-center space-x-6 text-gray-400">
-                <button onClick={() => setShowPrivacyModal(true)} className="hover:text-rose-400 transition-colors">Privacy Policy</button>
-                <button onClick={() => setShowTermsModal(true)} className="hover:text-rose-400 transition-colors">Terms of Service</button>
-                <button onClick={() => setShowSupportModal(true)} className="hover:text-rose-400 transition-colors">Support</button>
-              </div>
-            </div>
-          </div>
-        </footer>
-        
-        {/* Modals */}
-        <PrivacyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
-        <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
-        <SupportModal isOpen={showSupportModal} onClose={() => setShowSupportModal(false)} />
-      </div>
-    </ErrorBoundary>
-  );
-};
-
-export default ZeyaApp;
