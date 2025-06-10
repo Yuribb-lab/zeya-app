@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
 
-// �쨼 Telegram Bot Configuration
+// 🤖 Telegram Bot Configuration
 const TELEGRAM_CONFIG = {
   botToken: '7948996488:AAG_5aMk6_OFg22QM411BdZ54TUPzJqvnxA',
   chatId: 6447858148
 };
 
-// �� Stripe Payment Links for zeyalove.com (LIVE MODE)
-// �좑툘 IMPORTANT: Configure in Stripe Dashboard:
+// 🚀 Stripe Payment Links for zeyalove.com (LIVE MODE)
+// ⚠️ IMPORTANT: Configure in Stripe Dashboard:
 // Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
 // (Cancel URL is not needed - Stripe handles this automatically)
 const stripePaymentLinks = {
@@ -111,7 +111,7 @@ const PrivacyModal = ({ isOpen, onClose }) => {
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Privacy Policy</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-              횞
+              ×
             </button>
           </div>
         </div>
@@ -163,7 +163,7 @@ const TermsModal = ({ isOpen, onClose }) => {
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Terms of Service</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-              횞
+              ×
             </button>
           </div>
         </div>
@@ -225,14 +225,14 @@ const SupportModal = ({ isOpen, onClose }) => {
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Customer Support</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-              횞
+              ×
             </button>
           </div>
         </div>
         <div className="p-6 space-y-6">
           <div className="text-center">
             <Heart className="h-16 w-16 text-rose-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">We're Here to Help! �뮆</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">We're Here to Help! 💕</h3>
             <p className="text-gray-600">Our support team is dedicated to ensuring you have the best experience with Zeya.</p>
           </div>
 
@@ -357,7 +357,7 @@ const ZeyaApp = () => {
     idealRelationship: ''
   });
 
-  // �뵇 Enhanced payment detection with automatic redirect handling
+  // 🔍 Enhanced payment detection with automatic redirect handling
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentURL = window.location.href;
@@ -379,7 +379,7 @@ const ZeyaApp = () => {
                             paymentSuccess === 'true' || success === 'true' ||
                             redirectStatus === 'succeeded';
     
-    console.log('�렞 COMPLETE Payment Detection:', {
+    console.log('🎯 COMPLETE Payment Detection:', {
       currentURL,
       allParams,
       sessionId, 
@@ -394,63 +394,63 @@ const ZeyaApp = () => {
     
     // Always log localStorage content
     const savedData = localStorage.getItem('zeyaOrderData');
-    console.log('�뮶 LocalStorage content:', savedData);
+    console.log('💾 LocalStorage content:', savedData);
     
     if (isPaymentSuccess) {
-      console.log('�뮩 Payment success detected, restoring data...');
+      console.log('💳 Payment success detected, restoring data...');
       
-      // ���λ맂 �곗씠�� 蹂듭썝
+      // 저장된 데이터 복원
       const savedData = localStorage.getItem('zeyaOrderData');
-      console.log('�뮶 Raw saved data:', savedData);
+      console.log('💾 Raw saved data:', savedData);
       
       if (savedData) {
         try {
           const orderData = JSON.parse(savedData);
-          console.log('�뱞 Parsed order data:', orderData);
+          console.log('📄 Parsed order data:', orderData);
           
-          // 利됱떆 �곹깭 �낅뜲�댄듃
+          // 즉시 상태 업데이트
           if (orderData.selectedPlan) {
             setSelectedPlan(orderData.selectedPlan);
-            console.log('�� Plan restored:', orderData.selectedPlan);
+            console.log('✅ Plan restored:', orderData.selectedPlan);
           }
           
           if (orderData.surveyData) {
             setSurveyData(orderData.surveyData);
-            console.log('�� Survey data restored:', orderData.surveyData);
+            console.log('✅ Survey data restored:', orderData.surveyData);
           }
           
-          // �붾젅洹몃옩 �뚮┝ �꾩넚
+          // 텔레그램 알림 전송
           const fullCustomerData = {
             ...orderData.surveyData,
             selectedPlan: orderData.selectedPlan
           };
           
-          console.log('�뱾 Sending notification with full data:', fullCustomerData);
+          console.log('📤 Sending notification with full data:', fullCustomerData);
           
-          // 利됱떆 �뚮┝ 泥섎━
+          // 즉시 알림 처리
           setTimeout(() => {
             processCustomerNotification(fullCustomerData);
           }, 1000);
           
         } catch (error) {
-          console.error('�� Error parsing saved data:', error);
+          console.error('❌ Error parsing saved data:', error);
         }
       } else {
-        console.log('�좑툘 No saved data found in localStorage');
+        console.log('⚠️ No saved data found in localStorage');
       }
       
-      // Thank you �섏씠吏�濡� �대룞
+      // Thank you 페이지로 이동
       setShowSurvey(false);
       setShowDetailedSurvey(false);
       setShowPlanSelection(false);
       setShowThankYou(true);
       
-      // URL �뺣━
+      // URL 정리
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
-const plans = [
+  const plans = [
   {
     name: 'Sweet Beginning',
     price: 149,
@@ -514,42 +514,42 @@ const plans = [
   }
 ];
 
-  // �쨼 Enhanced Telegram notification with better error handling
+  // 🤖 Enhanced Telegram notification with better error handling
   const sendTelegramNotification = async (customerData) => {
     try {
-      console.log('�뱾 Starting Telegram notification...');
+      console.log('📤 Starting Telegram notification...');
       console.log('Customer Data for notification:', customerData);
       
       const message = `
-�럦 *New Zeya Customer Registration!*
+🎉 *New Zeya Customer Registration!*
 
-�뫀 *Name:* ${customerData.name || 'N/A'}
-�뱟 *Age:* ${customerData.age || 'N/A'}
-�뙇 *Country:* ${customerData.country || 'N/A'}
-�벑 *Telegram:* ${customerData.telegramUsername || 'N/A'}
+👤 *Name:* ${customerData.name || 'N/A'}
+📅 *Age:* ${customerData.age || 'N/A'}
+🌍 *Country:* ${customerData.country || 'N/A'}
+📱 *Telegram:* ${customerData.telegramUsername || 'N/A'}
 
-�뮥 *Plan:* ${customerData.selectedPlan?.name || 'N/A'}
-�뮫 *Price:* $${customerData.selectedPlan?.price || 'N/A'}
+💰 *Plan:* ${customerData.selectedPlan?.name || 'N/A'}
+💵 *Price:* $${customerData.selectedPlan?.price || 'N/A'}
 
-�뱷 *Life Situation:* ${customerData.lifeSituation || 'N/A'}
-�뮠 *Communication Style:* ${customerData.communicationStyle || 'N/A'}
-�쭬 *Personality Type:* ${customerData.personalityType || 'N/A'}
-�� *Daily Schedule:* ${customerData.dailySchedule || 'N/A'}
-�렞 *Interests:* ${customerData.interests?.join(', ') || 'N/A'}
+📝 *Life Situation:* ${customerData.lifeSituation || 'N/A'}
+💬 *Communication Style:* ${customerData.communicationStyle || 'N/A'}
+🧠 *Personality Type:* ${customerData.personalityType || 'N/A'}
+⏰ *Daily Schedule:* ${customerData.dailySchedule || 'N/A'}
+🎯 *Interests:* ${customerData.interests?.join(', ') || 'N/A'}
 
-�뮇 *Emotional Support:* ${customerData.emotionalSupport || 'N/A'}
-�뙵 *Stress Relief:* ${customerData.stressRelief || 'N/A'}
-�뮆 *Emotional Openness:* ${customerData.emotionalOpenness || 'N/A'}
-�뫁 *Ideal Relationship:* ${customerData.idealRelationship || 'N/A'}
+💖 *Emotional Support:* ${customerData.emotionalSupport || 'N/A'}
+🌸 *Stress Relief:* ${customerData.stressRelief || 'N/A'}
+💕 *Emotional Openness:* ${customerData.emotionalOpenness || 'N/A'}
+👥 *Ideal Relationship:* ${customerData.idealRelationship || 'N/A'}
 
-�� *Registration Time:* ${new Date().toLocaleString('en-US')}
-�뙋 *Website:* https://zeyalove.com
+⏰ *Registration Time:* ${new Date().toLocaleString('en-US')}
+🌐 *Website:* https://zeyalove.com
       `.trim();
 
-      console.log('�뱷 Message to send:', message);
+      console.log('📝 Message to send:', message);
       
       const telegramURL = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
-      console.log('�뙋 Telegram URL:', telegramURL);
+      console.log('🌐 Telegram URL:', telegramURL);
       
       const requestBody = {
         chat_id: TELEGRAM_CONFIG.chatId,
@@ -557,7 +557,7 @@ const plans = [
         parse_mode: 'Markdown'
       };
       
-      console.log('�벀 Request body:', requestBody);
+      console.log('📦 Request body:', requestBody);
       
       const response = await fetch(telegramURL, {
         method: 'POST',
@@ -568,40 +568,40 @@ const plans = [
       });
 
       const responseData = await response.json();
-      console.log('�벂 Telegram Response:', responseData);
-      console.log('�뱤 Response status:', response.status);
-      console.log('�� Response ok:', response.ok);
+      console.log('📨 Telegram Response:', responseData);
+      console.log('📊 Response status:', response.status);
+      console.log('✅ Response ok:', response.ok);
 
       if (response.ok && responseData.ok) {
-        console.log('�� Telegram notification sent successfully!');
+        console.log('✅ Telegram notification sent successfully!');
         return { success: true, data: responseData };
       } else {
-        console.error('�� Telegram API error:', responseData);
+        console.error('❌ Telegram API error:', responseData);
         return { success: false, error: responseData };
       }
     } catch (error) {
-      console.error('�� Telegram notification failed with exception:', error);
+      console.error('❌ Telegram notification failed with exception:', error);
       return { success: false, error: error.message };
     }
   };
 
   // Process customer notifications with enhanced reliability
   const processCustomerNotification = async (customerData) => {
-    console.log('�뵒 STARTING NOTIFICATION PROCESS...');
-    console.log('�뱤 Notification data:', customerData);
+    console.log('🔔 STARTING NOTIFICATION PROCESS...');
+    console.log('📊 Notification data:', customerData);
     setCustomerNotificationStatus('sending');
     
     try {
-      console.log('�� Sending Telegram notification...');
+      console.log('⏳ Sending Telegram notification...');
       const telegramResult = await sendTelegramNotification(customerData);
       
-      console.log('�벂 Telegram result:', telegramResult);
+      console.log('📨 Telegram result:', telegramResult);
       
       if (telegramResult.success) {
         setCustomerNotificationStatus('sent');
-        console.log('�� NOTIFICATION SENT SUCCESSFULLY!');
+        console.log('✅ NOTIFICATION SENT SUCCESSFULLY!');
         
-        // �깃났 濡쒓렇瑜� localStorage�먮룄 ����
+        // 성공 로그를 localStorage에도 저장
         const notificationLog = {
           timestamp: new Date().toISOString(),
           status: 'success',
@@ -613,9 +613,9 @@ const plans = [
         
       } else {
         setCustomerNotificationStatus('error');
-        console.error('�� NOTIFICATION FAILED:', telegramResult.error);
+        console.error('❌ NOTIFICATION FAILED:', telegramResult.error);
         
-        // �ㅽ뙣 濡쒓렇 ����
+        // 실패 로그 저장
         const errorLog = {
           timestamp: new Date().toISOString(),
           status: 'failed',
@@ -625,21 +625,21 @@ const plans = [
         };
         localStorage.setItem('zeya_notification_error', JSON.stringify(errorLog));
         
-        // �먮룞 �ъ떆�� (1��)
-        console.log('�봽 Attempting automatic retry...');
+        // 자동 재시도 (1회)
+        console.log('🔄 Attempting automatic retry...');
         setTimeout(async () => {
           const retryResult = await sendTelegramNotification(customerData);
           if (retryResult.success) {
             setCustomerNotificationStatus('sent');
-            console.log('�� RETRY SUCCESSFUL!');
+            console.log('✅ RETRY SUCCESSFUL!');
           } else {
-            console.error('�� RETRY ALSO FAILED');
+            console.error('❌ RETRY ALSO FAILED');
           }
         }, 3000);
       }
     } catch (error) {
       setCustomerNotificationStatus('error');
-      console.error('�� CRITICAL ERROR in notification process:', error);
+      console.error('❌ CRITICAL ERROR in notification process:', error);
     }
   };
 
@@ -682,19 +682,19 @@ const plans = [
       return;
     }
     
-    // 湲곕낯 �뺣낫 寃�利�
+    // 기본 정보 검증
     if (!surveyData.name || !surveyData.age || !surveyData.country || !surveyData.telegramUsername) {
       alert('Please fill in all required fields.');
       return;
     }
     
-    console.log('�� Basic info submitted:', surveyData);
+    console.log('✅ Basic info submitted:', surveyData);
     setShowSurvey(false);
     setShowDetailedSurvey(true);
   };
 
   const handleDetailedSurveySubmit = () => {
-    // �곸꽭 �ㅻЦ議곗궗 �꾩닔 �꾨뱶 寃�利�
+    // 상세 설문조사 필수 필드 검증
     const requiredFields = {
       lifeSituation: 'Life Situation',
       communicationStyle: 'Communication Style', 
@@ -713,17 +713,17 @@ const plans = [
       }
     }
     
-    // 愿��ъ궗 寃�利� (理쒖냼 1媛�)
+    // 관심사 검증 (최소 1개)
     if (!surveyData.interests || surveyData.interests.length === 0) {
       missingFields.push('At least one Interest');
     }
     
     if (missingFields.length > 0) {
-      alert(`Please fill in the following required fields:\n\n�� ${missingFields.join('\n�� ')}`);
+      alert(`Please fill in the following required fields:\n\n• ${missingFields.join('\n• ')}`);
       return;
     }
     
-    console.log('�� Detailed survey submitted:', surveyData);
+    console.log('✅ Detailed survey submitted:', surveyData);
     setShowDetailedSurvey(false);
     setShowPlanSelection(true);
   };
@@ -732,21 +732,21 @@ const plans = [
     const selectedPlanData = { name: planName, price: price };
     setSelectedPlan(selectedPlanData);
     
-    console.log('�뮶 STARTING DATA SAVE PROCESS...');
-    console.log('�뱤 Current Survey Data:', surveyData);
-    console.log('�뱥 Selected Plan Data:', selectedPlanData);
+    console.log('💾 STARTING DATA SAVE PROCESS...');
+    console.log('📊 Current Survey Data:', surveyData);
+    console.log('📋 Selected Plan Data:', selectedPlanData);
     
-    // �곗씠�� �꾩쟾�� 寃�利�
+    // 데이터 완전성 검증
     const requiredFields = ['name', 'age', 'country', 'telegramUsername'];
     const missingFields = requiredFields.filter(field => !surveyData[field]);
     
     if (missingFields.length > 0) {
-      console.error('�� Missing required fields:', missingFields);
+      console.error('❌ Missing required fields:', missingFields);
       alert(`Missing required information: ${missingFields.join(', ')}\nPlease complete the survey first.`);
       return;
     }
     
-    // �꾩쟾�� �곗씠�� 以�鍮�
+    // 완전한 데이터 준비
     const completeOrderData = {
       selectedPlan: selectedPlanData,
       surveyData: { 
@@ -758,25 +758,25 @@ const plans = [
       version: '2.0'
     };
     
-    console.log('�벀 Complete order data to save:', completeOrderData);
+    console.log('📦 Complete order data to save:', completeOrderData);
     
-    // localStorage�� �щ윭 諛⑹떇�쇰줈 ���� (諛깆뾽)
+    // localStorage에 여러 방식으로 저장 (백업)
     try {
-      // 湲곗〈 �곗씠�� �꾩쟾 ��젣
+      // 기존 데이터 완전 삭제
       localStorage.removeItem('zeyaOrderData');
       localStorage.removeItem('zeya_backup');
       localStorage.removeItem('zeya_survey');
       localStorage.removeItem('zeya_plan');
       
-      // 硫붿씤 ����
+      // 메인 저장
       localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
       
-      // 諛깆뾽 ���� (�щ윭 �ㅻ줈)
+      // 백업 저장 (여러 키로)
       localStorage.setItem('zeya_backup', JSON.stringify(completeOrderData));
       localStorage.setItem('zeya_survey', JSON.stringify(surveyData));
       localStorage.setItem('zeya_plan', JSON.stringify(selectedPlanData));
       
-      // 利됱떆 寃�利�
+      // 즉시 검증
       const verification = localStorage.getItem('zeyaOrderData');
       const backupVerification = localStorage.getItem('zeya_backup');
       
@@ -785,40 +785,40 @@ const plans = [
       }
       
       const parsedData = JSON.parse(verification);
-      console.log('�� Data saved and verified successfully:', parsedData);
+      console.log('✅ Data saved and verified successfully:', parsedData);
       
-      // 異붽� 寃�利�
+      // 추가 검증
       if (!parsedData.surveyData.name || !parsedData.selectedPlan.name) {
         throw new Error('Saved data is incomplete');
       }
       
     } catch (error) {
-      console.error('�� Failed to save order data:', error);
+      console.error('❌ Failed to save order data:', error);
       alert('Error saving your information. Please try again or contact support.');
       return;
     }
     
-    // Stripe 寃곗젣濡� 由щ떎�대젆��
+    // Stripe 결제로 리다이렉트
     const stripeUrl = stripePaymentLinks[planName];
     
-    console.log('�뵕 Available Stripe Links:', stripePaymentLinks);
-    console.log(`�렞 Selected plan: ${planName}`);
-    console.log(`�뮩 Stripe URL for ${planName}:`, stripeUrl);
+    console.log('🔗 Available Stripe Links:', stripePaymentLinks);
+    console.log(`🎯 Selected plan: ${planName}`);
+    console.log(`💳 Stripe URL for ${planName}:`, stripeUrl);
     
     if (stripeUrl) {
-      console.log(`�� Redirecting to ${planName} payment...`);
-      console.log(`�뱧 Full redirect URL: ${stripeUrl}`);
+      console.log(`🚀 Redirecting to ${planName} payment...`);
+      console.log(`📍 Full redirect URL: ${stripeUrl}`);
       
-      // 由щ떎�대젆�� �� 留덉�留� �뺤씤
+      // 리다이렉트 전 마지막 확인
       setTimeout(() => {
         const finalCheck = localStorage.getItem('zeyaOrderData');
-        console.log('�뵇 Final check before redirect:', finalCheck ? 'Data exists' : 'Data missing');
+        console.log('🔍 Final check before redirect:', finalCheck ? 'Data exists' : 'Data missing');
         window.location.href = stripeUrl;
       }, 500);
       
     } else {
-      console.error('�� No Stripe URL found for plan:', planName);
-      alert(`�좑툘 Payment link for ${planName} is not configured yet. Please contact support at zeyasupport@zeyalove.com`);
+      console.error('❌ No Stripe URL found for plan:', planName);
+      alert(`⚠️ Payment link for ${planName} is not configured yet. Please contact support at zeyasupport@zeyalove.com`);
     }
   };
 
@@ -829,7 +829,7 @@ const plans = [
         <div className="max-w-2xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 border border-rose-200">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-4">
-              AI Personality Assessment �뮟
+              AI Personality Assessment 💫
             </h2>
             <p className="text-gray-600">Help our advanced AI understand your unique personality to find your perfect companion match</p>
           </div>
@@ -878,18 +878,18 @@ const plans = [
                     required
                   >
                     <option value="">Choose your country...</option>
-                    <option value="US">United States �눣�눡</option>
-                    <option value="CA">Canada �눊�눇</option>
-                    <option value="UK">United Kingdom �눐�눉</option>
-                    <option value="AU">Australia �눇�눣</option>
-                    <option value="DE">Germany �눍�눎</option>
-                    <option value="FR">France �눏�눟</option>
-                    <option value="JP">Japan �눓�눝</option>
-                    <option value="SG">Singapore �눡�눐</option>
-                    <option value="NL">Netherlands �눛�눘</option>
-                    <option value="SE">Sweden �눡�눎</option>
-                    <option value="NO">Norway �눛�눜</option>
-                    <option value="OTHER">Other ��</option>
+                    <option value="US">United States 🇺🇸</option>
+                    <option value="CA">Canada 🇨🇦</option>
+                    <option value="UK">United Kingdom 🇬🇧</option>
+                    <option value="AU">Australia 🇦🇺</option>
+                    <option value="DE">Germany 🇩🇪</option>
+                    <option value="FR">France 🇫🇷</option>
+                    <option value="JP">Japan 🇯🇵</option>
+                    <option value="SG">Singapore 🇸🇬</option>
+                    <option value="NL">Netherlands 🇳🇱</option>
+                    <option value="SE">Sweden 🇸🇪</option>
+                    <option value="NO">Norway 🇳🇴</option>
+                    <option value="OTHER">Other ✨</option>
                   </select>
                 </div>
                 <div>
@@ -903,7 +903,7 @@ const plans = [
                     required
                   />
                   {errors.telegramUsername && <p className="text-red-500 text-xs mt-1">{errors.telegramUsername}</p>}
-                  <p className="text-xs text-rose-600 mt-1">Required: This is how your companion will reach you ��</p>
+                  <p className="text-xs text-rose-600 mt-1">Required: This is how your companion will reach you ✨</p>
                 </div>
               </div>
             </div>
@@ -944,14 +944,14 @@ const plans = [
                 onClick={() => setShowSurvey(false)}
                 className="flex-1 px-8 py-4 border-2 border-gray-300 text-gray-600 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-medium"
               >
-                Maybe Later �쨺
+                Maybe Later 🤔
               </button>
               <button
                 onClick={handleBasicInfoSubmit}
                 disabled={!agreedToTerms || !surveyData.name || !surveyData.age || !surveyData.country || !surveyData.telegramUsername}
                 className="flex-1 bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                Continue to AI Analysis �쭬
+                Continue to AI Analysis 🧠
               </button>
             </div>
           </div>
@@ -971,7 +971,7 @@ const plans = [
         <div className="max-w-4xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 max-h-[90vh] overflow-y-auto border border-rose-200">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-4">
-              Advanced Compatibility Analysis, {surveyData.name} �쭬
+              Advanced Compatibility Analysis, {surveyData.name} 🧠
             </h2>
             <p className="text-gray-600">Our AI needs deeper insights to calculate your perfect compatibility match with 95% accuracy</p>
           </div>
@@ -992,11 +992,11 @@ const plans = [
                     required
                   >
                     <option value="">Your current chapter...</option>
-                    <option value="student">�뱴 Student (learning & growing)</option>
-                    <option value="working">�뮳 Working Professional</option>
-                    <option value="entrepreneur">�� Entrepreneur (chasing dreams)</option>
-                    <option value="between-jobs">�뙚 Between Adventures</option>
-                    <option value="retired">�뙷 Enjoying Life's Rewards</option>
+                    <option value="student">📚 Student (learning & growing)</option>
+                    <option value="working">💼 Working Professional</option>
+                    <option value="entrepreneur">🚀 Entrepreneur (chasing dreams)</option>
+                    <option value="between-jobs">🌟 Between Adventures</option>
+                    <option value="retired">🌺 Enjoying Life's Rewards</option>
                   </select>
                 </div>
                 <div>
@@ -1008,11 +1008,11 @@ const plans = [
                     required
                   >
                     <option value="">Your natural rhythm...</option>
-                    <option value="early-bird">�똿 Early Bird (sunrise energy)</option>
-                    <option value="regular">��截� Regular Hours (steady flow)</option>
-                    <option value="night-owl">�뙔 Night Owl (moonlight magic)</option>
-                    <option value="irregular">�렚 Irregular (spontaneous soul)</option>
-                    <option value="flexible">�뙂 Flexible (adaptable heart)</option>
+                    <option value="early-bird">🌅 Early Bird (sunrise energy)</option>
+                    <option value="regular">☀️ Regular Hours (steady flow)</option>
+                    <option value="night-owl">🌙 Night Owl (moonlight magic)</option>
+                    <option value="irregular">🎭 Irregular (spontaneous soul)</option>
+                    <option value="flexible">🌈 Flexible (adaptable heart)</option>
                   </select>
                 </div>
               </div>
@@ -1033,10 +1033,10 @@ const plans = [
                     required
                   >
                     <option value="">How do you love to connect?</option>
-                    <option value="deep-meaningful">�뮡 Deep & Meaningful (soul-searching)</option>
-                    <option value="light-casual">�뙵 Light & Casual (easy-going)</option>
-                    <option value="humorous-playful">�쁽 Humorous & Playful (joyful spirit)</option>
-                    <option value="mix-all">�렓 Mix of All (colorful conversations)</option>
+                    <option value="deep-meaningful">💭 Deep & Meaningful (soul-searching)</option>
+                    <option value="light-casual">🌸 Light & Casual (easy-going)</option>
+                    <option value="humorous-playful">😄 Humorous & Playful (joyful spirit)</option>
+                    <option value="mix-all">🎨 Mix of All (colorful conversations)</option>
                   </select>
                 </div>
                 <div>
@@ -1048,9 +1048,9 @@ const plans = [
                     required
                   >
                     <option value="">What describes your spirit?</option>
-                    <option value="introverted">�뙔 Introverted (gentle & thoughtful)</option>
-                    <option value="extroverted">��截� Extroverted (bright & social)</option>
-                    <option value="balanced">�뽳툘 Balanced (harmonious blend)</option>
+                    <option value="introverted">🌙 Introverted (gentle & thoughtful)</option>
+                    <option value="extroverted">☀️ Extroverted (bright & social)</option>
+                    <option value="balanced">⚖️ Balanced (harmonious blend)</option>
                   </select>
                 </div>
               </div>
@@ -1071,11 +1071,11 @@ const plans = [
                     required
                   >
                     <option value="">Choose your support style...</option>
-                    <option value="warm-empathy">�쨽 Warm comfort & empathy</option>
-                    <option value="practical-advice">�뮕 Practical advice & solutions</option>
-                    <option value="quiet-listening">�몔 Quiet listening & presence</option>
-                    <option value="humor-energy">�뙂 Humor & positive energy</option>
-                    <option value="companionship">�쩃 Simply being there together</option>
+                    <option value="warm-empathy">🤗 Warm comfort & empathy</option>
+                    <option value="practical-advice">💡 Practical advice & solutions</option>
+                    <option value="quiet-listening">👂 Quiet listening & presence</option>
+                    <option value="humor-energy">🌈 Humor & positive energy</option>
+                    <option value="companionship">🤝 Simply being there together</option>
                   </select>
                 </div>
                 <div>
@@ -1087,11 +1087,11 @@ const plans = [
                     required
                   >
                     <option value="">Your healing method...</option>
-                    <option value="alone-time">�썘截� Alone time to recharge</option>
-                    <option value="social-connection">�뫉 Talking with people</option>
-                    <option value="physical-activity">�룂�띯�截� Exercise & movement</option>
-                    <option value="mindful-arts">�쭣�띯�截� Meditation, music, arts</option>
-                    <option value="new-environment">�렕 New places & experiences</option>
+                    <option value="alone-time">🛋️ Alone time to recharge</option>
+                    <option value="social-connection">👫 Talking with people</option>
+                    <option value="physical-activity">🏃‍♀️ Exercise & movement</option>
+                    <option value="mindful-arts">🧘‍♀️ Meditation, music, arts</option>
+                    <option value="new-environment">🎪 New places & experiences</option>
                   </select>
                 </div>
               </div>
@@ -1112,11 +1112,11 @@ const plans = [
                     required
                   >
                     <option value="">Your emotional timing...</option>
-                    <option value="immediate">�똿 Naturally open from the start</option>
-                    <option value="few-days">�뙟截� After a few days of chatting</option>
-                    <option value="few-weeks">�뙔 After weeks of building trust</option>
-                    <option value="few-months">�뙆 Slowly over several months</option>
-                    <option value="situational">�렚 Depends on the feeling & situation</option>
+                    <option value="immediate">🌅 Naturally open from the start</option>
+                    <option value="few-days">🌤️ After a few days of chatting</option>
+                    <option value="few-weeks">🌙 After weeks of building trust</option>
+                    <option value="few-months">🌌 Slowly over several months</option>
+                    <option value="situational">🎭 Depends on the feeling & situation</option>
                   </select>
                 </div>
                 <div>
@@ -1128,11 +1128,11 @@ const plans = [
                     required
                   >
                     <option value="">Your perfect connection...</option>
-                    <option value="devoted-priority">�몣 Being each other's top priority</option>
-                    <option value="growth-partnership">�뙮 Growing & evolving together</option>
-                    <option value="stable-comfort">�룧 Comfortable, stable daily sharing</option>
-                    <option value="passionate-romantic">�렚 Passionate & deeply romantic</option>
-                    <option value="independent-support">�쩃 Independent yet supportive</option>
+                    <option value="devoted-priority">👑 Being each other's top priority</option>
+                    <option value="growth-partnership">🌱 Growing & evolving together</option>
+                    <option value="stable-comfort">🏠 Comfortable, stable daily sharing</option>
+                    <option value="passionate-romantic">🎭 Passionate & deeply romantic</option>
+                    <option value="independent-support">🤝 Independent yet supportive</option>
                   </select>
                 </div>
               </div>
@@ -1180,7 +1180,7 @@ const plans = [
                 disabled={loading}
                 className="flex-1 bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {loading ? 'AI Processing Your Profile...' : 'Complete AI Matching �렞'}
+                {loading ? 'AI Processing Your Profile...' : 'Complete AI Matching 🎯'}
               </button>
             </div>
           </div>
@@ -1196,7 +1196,7 @@ const plans = [
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
-              Your AI Match is Ready! �렞
+              Your AI Match is Ready! 🎯
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Our AI has analyzed your personality and found your perfect companion match, {surveyData.name}! Choose your preferred connection level to begin.
@@ -1221,7 +1221,7 @@ const plans = [
                   {index === 2 && (
                     <div className="mt-3">
                       <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium">
-                        Most Popular ��
+                        Most Popular ✨
                       </span>
                     </div>
                   )}
@@ -1243,7 +1243,7 @@ const plans = [
                       : 'bg-gray-100 text-gray-800 hover:bg-gradient-to-r hover:from-rose-400 hover:to-pink-400 hover:text-white'
                   }`}
                 >
-                  Choose This Plan ��
+                  Choose This Plan ✨
                 </button>
               </div>
             ))}
@@ -1270,7 +1270,7 @@ const plans = [
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 flex items-center justify-center p-4">
         <div className="max-w-2xl w-full bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-10 text-center border border-rose-200">
-          <div className="text-8xl mb-6">�럦</div>
+          <div className="text-8xl mb-6">🎉</div>
           <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-6">
             Payment Successful, {surveyData.name || 'valued customer'}!
           </h1>
@@ -1282,9 +1282,9 @@ const plans = [
                 <Heart className="h-8 w-8 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-green-800 mb-3">�� Your Payment is Complete!</h2>
+            <h2 className="text-2xl font-bold text-green-800 mb-3">✅ Your Payment is Complete!</h2>
             <p className="text-green-700 text-lg">
-              �쨼 Our AI matching system is now preparing your perfect companion match!
+              🤖 Our AI matching system is now preparing your perfect companion match!
             </p>
             
             {/* Professional Notification Status */}
@@ -1298,7 +1298,7 @@ const plans = [
               {customerNotificationStatus === 'sent' && (
                 <div className="space-y-2">
                   <div className="text-green-700">
-                    �� Order confirmation processed successfully
+                    ✅ Order confirmation processed successfully
                   </div>
                   <div className="text-sm text-gray-600">
                     Customer service team has been notified of your registration
@@ -1307,47 +1307,47 @@ const plans = [
               )}
               {customerNotificationStatus === 'error' && (
                 <div className="text-red-700">
-                  �좑툘 Notification processing delayed - Please contact support if needed
+                  ⚠️ Notification processing delayed - Please contact support if needed
                 </div>
               )}
               {customerNotificationStatus === 'pending' && (
                 <div className="text-gray-600">
-                  �봽 Preparing order confirmation...
+                  🔄 Preparing order confirmation...
                 </div>
               )}
             </div>
           </div>
 
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            �렞 <strong>Next Steps:</strong> Our advanced AI has analyzed your personality profile and is finalizing your perfect companion match. 
+            🎯 <strong>Next Steps:</strong> Our advanced AI has analyzed your personality profile and is finalizing your perfect companion match. 
             You'll receive a private Telegram message within 12 hours to begin your emotional journey.
           </p>
 
           {selectedPlan && (
             <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-6 rounded-2xl mb-8 border border-rose-100">
               <h3 className="text-lg font-bold text-rose-800 mb-2">
-                �� Your Active {selectedPlan.name} Plan
+                ✨ Your Active {selectedPlan.name} Plan
               </h3>
               <p className="text-rose-600">Monthly subscription: ${selectedPlan.price}</p>
-              <p className="text-sm text-rose-700 mt-2">�렞 Compatibility Score: 95%+ �� Perfect Match Guaranteed</p>
+              <p className="text-sm text-rose-700 mt-2">🎯 Compatibility Score: 95%+ • Perfect Match Guaranteed</p>
             </div>
           )}
 
           <div className="bg-blue-50 p-6 rounded-2xl mb-8 border border-blue-100">
-            <h4 className="font-bold text-blue-800 mb-3">�벑 Your Companion Will Contact You At:</h4>
+            <h4 className="font-bold text-blue-800 mb-3">📱 Your Companion Will Contact You At:</h4>
             <div className="space-y-2 text-blue-700">
               <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Please provide your username'}</p>
               <p><strong>Plan:</strong> {selectedPlan?.name || 'Plan information loading...'}</p>
               <p><strong>Location:</strong> {surveyData.country || 'Location information loading...'}</p>
               <p className="text-sm mt-3 text-blue-600">
-                �뮠 <strong>Expected Contact Time:</strong> Within 12 hours of payment confirmation
+                💬 <strong>Expected Contact Time:</strong> Within 12 hours of payment confirmation
               </p>
             </div>
           </div>
 
           {/* Enhanced Debug Info with Real Data */}
           <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-left text-gray-600">
-            <p><strong>�뵇 Complete Registration Summary:</strong></p>
+            <p><strong>🔍 Complete Registration Summary:</strong></p>
             <div className="grid grid-cols-2 gap-2 mt-2">
               <p><strong>Name:</strong> {surveyData.name || 'Not provided'}</p>
               <p><strong>Age:</strong> {surveyData.age || 'Not provided'}</p>
@@ -1367,11 +1367,11 @@ const plans = [
             
             {/* Data Source Info */}
             <div className="mt-3 p-2 bg-blue-50 rounded">
-              <p><strong>�뵇 Technical Debug:</strong></p>
-              <p>Survey Data Status: {surveyData.name ? '�� Loaded' : '�� Missing'}</p>
-              <p>Plan Data Status: {selectedPlan?.name ? '�� Loaded' : '�� Missing'}</p>
+              <p><strong>🔍 Technical Debug:</strong></p>
+              <p>Survey Data Status: {surveyData.name ? '✅ Loaded' : '❌ Missing'}</p>
+              <p>Plan Data Status: {selectedPlan?.name ? '✅ Loaded' : '❌ Missing'}</p>
               <p>Notification Status: {customerNotificationStatus}</p>
-              <p>LocalStorage Check: {localStorage.getItem('zeyaOrderData') ? '�� Present' : '�� Missing'}</p>
+              <p>LocalStorage Check: {localStorage.getItem('zeyaOrderData') ? '✅ Present' : '❌ Missing'}</p>
             </div>
           </div>
 
@@ -1402,7 +1402,7 @@ const plans = [
             }}
             className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-10 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium text-lg"
           >
-            Explore More About Zeya �뙚
+            Explore More About Zeya 🌟
           </button>
         </div>
       </div>
@@ -1428,7 +1428,7 @@ const plans = [
                   onClick={() => setShowSurvey(true)}
                   className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-6 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
                 >
-                  Begin Your Journey �뮇
+                  Begin Your Journey 💖
                 </button>
               </div>
             </div>
@@ -1450,7 +1450,7 @@ const plans = [
               onClick={() => setShowSurvey(true)}
               className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-10 py-5 rounded-3xl text-xl font-semibold hover:from-rose-600 hover:to-pink-600 transition-all duration-300 shadow-2xl transform hover:-translate-y-2"
             >
-              Find Your Perfect Companion ��
+              Find Your Perfect Companion ✨
             </button>
           </div>
         </section>
@@ -1493,25 +1493,25 @@ const plans = [
             </h2>
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-rose-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">�벑</div>
+                <div className="text-6xl mb-6">📱</div>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   That flutter in your heart when you see her <span className="text-rose-600 font-semibold">"Good morning, beautiful"</span> text
                 </p>
               </div>
               <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-pink-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">�뮡</div>
+                <div className="text-6xl mb-6">💭</div>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   The gentle warmth of someone asking <span className="text-pink-600 font-semibold">"How was your day, sweetheart?"</span>
                 </p>
               </div>
               <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">�뙔</div>
+                <div className="text-6xl mb-6">🌙</div>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   The peaceful comfort of her soft <span className="text-purple-600 font-semibold">"Sweet dreams"</span> before you sleep
                 </p>
               </div>
               <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-orange-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="text-6xl mb-6">�럦</div>
+                <div className="text-6xl mb-6">🎉</div>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   The pure joy of someone being <span className="text-orange-600 font-semibold">genuinely excited</span> about your achievements
                 </p>
@@ -1565,31 +1565,31 @@ const plans = [
             <div className="space-y-4">
               {[
                 {
-                  question: "How does your AI matching algorithm work? �쨼",
+                  question: "How does your AI matching algorithm work? 🤖",
                   answer: "Our proprietary AI analyzes 50+ data points including personality traits, communication styles, emotional needs, values, lifestyle preferences, and relationship goals. Using advanced machine learning, we calculate compatibility scores and match you with companions who complement your unique psychological profile. Our algorithm has a 95% satisfaction rate."
                 },
                 {
-                  question: "How is Zeya different from platforms like OnlyFans? �뙚",
+                  question: "How is Zeya different from platforms like OnlyFans? 🌟",
                   answer: "Zeya is a 100% Safe-for-Work (SFW) platform focused exclusively on emotional connection and meaningful relationships. Unlike adult platforms, we offer no sexual content whatsoever. Instead, we provide deeper emotional intimacy through genuine conversation, personal growth support, and authentic companionship that goes beyond surface-level interactions."
                 },
                 {
-                  question: "What makes your emotional connections deeper than other platforms? �뮑",
+                  question: "What makes your emotional connections deeper than other platforms? 💝",
                   answer: "By removing sexual elements entirely, we create space for profound emotional intimacy. Our AI-matched companions focus on understanding your thoughts, dreams, fears, and aspirations. You'll experience genuine care, personalized attention, and meaningful conversations that help you grow as a person while feeling truly understood and valued."
                 },
                 {
-                  question: "How accurate is the AI matching process? �렞",
+                  question: "How accurate is the AI matching process? 🎯",
                   answer: "Our AI matching system has been trained on thousands of successful companion relationships and achieves a 95% compatibility rate. The comprehensive assessment analyzes psychological compatibility, communication styles, emotional needs, and lifestyle factors to ensure optimal matches. If you're not satisfied with your match within the first week, we offer free re-matching."
                 },
                 {
-                  question: "What type of conversations can I have? �뮠",
+                  question: "What type of conversations can I have? 💬",
                   answer: "All conversations focus on emotional support, friendship, life advice, motivation, and meaningful companionship. Think of it like having a caring friend who's always there to listen, encourage, and support you through life's journey. We maintain strict SFW guidelines to ensure deep, meaningful connections."
                 },
                 {
-                  question: "Are these real people or AI? �뫁",
+                  question: "Are these real people or AI? 👥",
                   answer: "All our companions are real, verified women who specialize in providing emotional support and friendship. We use AI only for the initial matching process to ensure compatibility based on personality and communication style. Your conversations are always with real humans."
                 },
                 {
-                  question: "What happens after I make a payment? ��",
+                  question: "What happens after I make a payment? ⏰",
                   answer: "Within 12 hours of payment confirmation, you'll receive a private Telegram message from your AI-matched companion. She'll introduce herself and begin providing emotional support and friendship according to your chosen plan and compatibility profile."
                 }
               ].map((faq, index) => (
@@ -1618,7 +1618,7 @@ const plans = [
 
             <div className="text-center mt-12">
               <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-8 border border-rose-100">
-                <h3 className="text-2xl font-bold text-rose-800 mb-4">Still Have Questions? �뮇</h3>
+                <h3 className="text-2xl font-bold text-rose-800 mb-4">Still Have Questions? 💖</h3>
                 <p className="text-gray-600 mb-6">
                   Our team is here to help you find the perfect companion for your emotional journey.
                 </p>
@@ -1627,7 +1627,7 @@ const plans = [
                     onClick={() => setShowSurvey(true)}
                     className="bg-gradient-to-r from-rose-400 to-pink-400 text-white px-8 py-3 rounded-2xl hover:from-rose-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
                   >
-                    Start Your Journey Today ��
+                    Start Your Journey Today ✨
                   </button>
                   <button 
                     onClick={() => window.open('https://t.me/ZeyaSupportBot', '_blank')}
@@ -1660,7 +1660,7 @@ const plans = [
               </p>
             </div>
             <div className="flex flex-col md:flex-row justify-between items-center border-t border-gray-700 pt-8">
-              <p className="text-gray-400 mb-4 md:mb-0">짤 2024 Zeya. Made with �ㅿ툘 for meaningful connections.</p>
+              <p className="text-gray-400 mb-4 md:mb-0">© 2024 Zeya. Made with ❤️ for meaningful connections.</p>
               <div className="flex items-center space-x-6 text-gray-400">
                 <button onClick={() => setShowPrivacyModal(true)} className="hover:text-rose-400 transition-colors">Privacy Policy</button>
                 <button onClick={() => setShowTermsModal(true)} className="hover:text-rose-400 transition-colors">Terms of Service</button>
