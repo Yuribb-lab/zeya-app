@@ -12,7 +12,7 @@ const TELEGRAM_CONFIG = {
 // Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
 // (Cancel URL is not needed - Stripe handles this automatically)
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/5kQ3cv6YNbSf1axcsa8so02', // 🔴 LIVE LINK
+  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🔴 LIVE LINK
   'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
   'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
