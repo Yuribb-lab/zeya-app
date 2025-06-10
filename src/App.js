@@ -12,9 +12,9 @@ const TELEGRAM_CONFIG = {
 // Success URL: https://zeyalove.com?session_id={CHECKOUT_SESSION_ID}&payment_success=true
 // (Cancel URL is not needed - Stripe handles this automatically)
 const stripePaymentLinks = {
-  'Soft Love': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🔴 LIVE LINK
-  'Romantic': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
-  'Deep Bond': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
+  'Sweet Beginning': 'https://buy.stripe.com/test_9B628kabNbbwc0je7Mbsc03', // 🔴 LIVE LINK
+  'Growing Close': 'https://buy.stripe.com/dRm6oH5UJbSff1n1Nw8so00',
+  'Deep Connection': 'https://buy.stripe.com/fZu5kDfvjg8vdXj0Js8so01',
   'Devoted': 'https://buy.stripe.com/fZu9AT6YNcWj8CZ2RA8so03',
   'Soulmate VIP': 'https://buy.stripe.com/5kQeVdaaZ09xaL7gIq8so04'
 };
@@ -392,37 +392,36 @@ const ZeyaApp = () => {
       isPaymentSuccess
     });
     
-    // Always log localStorage content
-    const savedData = localStorage.getItem('zeyaOrderData');
-    console.log('💾 LocalStorage content:', savedData);
+    // Always log React state content
+    const savedData = React.useState({})[0];
+    console.log('💾 React state content:', savedData);
     
     if (isPaymentSuccess) {
       console.log('💳 Payment success detected, restoring data...');
       
       // 저장된 데이터 복원
-      const savedData = localStorage.getItem('zeyaOrderData');
+      const savedData = React.useState({})[0];
       console.log('💾 Raw saved data:', savedData);
       
       if (savedData) {
         try {
-          const orderData = JSON.parse(savedData);
-          console.log('📄 Parsed order data:', orderData);
+          console.log('📄 Parsed order data:', savedData);
           
           // 즉시 상태 업데이트
-          if (orderData.selectedPlan) {
-            setSelectedPlan(orderData.selectedPlan);
-            console.log('✅ Plan restored:', orderData.selectedPlan);
+          if (savedData.selectedPlan) {
+            setSelectedPlan(savedData.selectedPlan);
+            console.log('✅ Plan restored:', savedData.selectedPlan);
           }
           
-          if (orderData.surveyData) {
-            setSurveyData(orderData.surveyData);
-            console.log('✅ Survey data restored:', orderData.surveyData);
+          if (savedData.surveyData) {
+            setSurveyData(savedData.surveyData);
+            console.log('✅ Survey data restored:', savedData.surveyData);
           }
           
           // 텔레그램 알림 전송
           const fullCustomerData = {
-            ...orderData.surveyData,
-            selectedPlan: orderData.selectedPlan
+            ...savedData.surveyData,
+            selectedPlan: savedData.selectedPlan
           };
           
           console.log('📤 Sending notification with full data:', fullCustomerData);
@@ -436,7 +435,7 @@ const ZeyaApp = () => {
           console.error('❌ Error parsing saved data:', error);
         }
       } else {
-        console.log('⚠️ No saved data found in localStorage');
+        console.log('⚠️ No saved data found in React state');
       }
       
       // Thank you 페이지로 이동
@@ -452,29 +451,65 @@ const ZeyaApp = () => {
 
   const plans = [
     {
-      name: 'Soft Love',
+      name: 'Sweet Beginning',
       price: 149,
-      features: ['Unlimited text messaging', 'Pure conversation focus', 'Basic emotional support', 'Daily connection']
+      features: [
+        'Unlimited text messaging',
+        'Sweet good morning & goodnight messages', 
+        'Gentle emotional support and encouragement',
+        'Personal interest-based conversations',
+        'Basic companionship experience'
+      ]
     },
     {
-      name: 'Romantic',
+      name: 'Growing Close',
       price: 399,
-      features: ['Unlimited text messaging', 'Voice messages twice per week', 'Custom nicknames & interests', 'Personalized conversations']
+      features: [
+        'Unlimited text messaging',
+        'Voice messages to hear her sweet voice',
+        'Custom pet names & shared interests',
+        'Personalized conversations throughout the week',
+        'Photo sharing of special moments'
+      ]
     },
     {
-      name: 'Deep Bond',
+      name: 'Deep Connection',
       price: 799,
-      features: ['Unlimited text messaging', 'Voice messages 3x per week', 'Video clips included', 'Weekly 15-minute video call', 'Monthly personalized video message']
+      features: [
+        'Unlimited text messaging',
+        'Unlimited voice messages',
+        'Regular video clips to see her smile',
+        'Weekly personal video calls (15 minutes)',
+        'Monthly personalized video messages',
+        'Celebration of your special moments'
+      ]
     },
     {
       name: 'Devoted',
       price: 1299,
-      features: ['Unlimited text messaging', 'Voice messages 5x per week', 'Video clips included', 'Two 15-minute video calls weekly', 'Virtual date scenario experiences', 'Special occasion gift reminders']
+      features: [
+        'Unlimited text messaging',
+        'Unlimited voice & video messages',
+        'Twice weekly video calls (15 minutes each)',
+        'Virtual companion experiences together',
+        'Special occasion surprises & reminders',
+        'Deep personal conversations & support',
+        'Priority response to your messages'
+      ]
     },
     {
       name: 'Soulmate VIP',
       price: 1999,
-      features: ['Unlimited text messaging', 'Unlimited voice messaging', 'Daily video clips', 'Two 30-minute video calls weekly', 'Monthly welcome video', 'Personalized "Emotion Album"', 'Priority connection anytime']
+      features: [
+        'Unlimited text messaging',
+        'Unlimited voice & video communication',
+        'Frequent personal video messages',
+        'Extended video calls (30 minutes, twice weekly)',
+        'Monthly friendship milestone videos',
+        'Personalized "Our Journey Album" creation',
+        '24/7 priority connection anytime',
+        'Exclusive companion activities & experiences'
+      ]
     }
   ];
 
@@ -565,29 +600,9 @@ const ZeyaApp = () => {
         setCustomerNotificationStatus('sent');
         console.log('✅ NOTIFICATION SENT SUCCESSFULLY!');
         
-        // 성공 로그를 localStorage에도 저장
-        const notificationLog = {
-          timestamp: new Date().toISOString(),
-          status: 'success',
-          customerName: customerData.name,
-          plan: customerData.selectedPlan?.name,
-          telegramResponse: telegramResult.data
-        };
-        localStorage.setItem('zeya_notification_log', JSON.stringify(notificationLog));
-        
       } else {
         setCustomerNotificationStatus('error');
         console.error('❌ NOTIFICATION FAILED:', telegramResult.error);
-        
-        // 실패 로그 저장
-        const errorLog = {
-          timestamp: new Date().toISOString(),
-          status: 'failed',
-          customerName: customerData.name,
-          error: telegramResult.error,
-          retryRecommended: true
-        };
-        localStorage.setItem('zeya_notification_error', JSON.stringify(errorLog));
         
         // 자동 재시도 (1회)
         console.log('🔄 Attempting automatic retry...');
@@ -724,37 +739,10 @@ const ZeyaApp = () => {
     
     console.log('📦 Complete order data to save:', completeOrderData);
     
-    // localStorage에 여러 방식으로 저장 (백업)
+    // React state에 저장 (localStorage 대신)
     try {
-      // 기존 데이터 완전 삭제
-      localStorage.removeItem('zeyaOrderData');
-      localStorage.removeItem('zeya_backup');
-      localStorage.removeItem('zeya_survey');
-      localStorage.removeItem('zeya_plan');
-      
-      // 메인 저장
-      localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
-      
-      // 백업 저장 (여러 키로)
-      localStorage.setItem('zeya_backup', JSON.stringify(completeOrderData));
-      localStorage.setItem('zeya_survey', JSON.stringify(surveyData));
-      localStorage.setItem('zeya_plan', JSON.stringify(selectedPlanData));
-      
-      // 즉시 검증
-      const verification = localStorage.getItem('zeyaOrderData');
-      const backupVerification = localStorage.getItem('zeya_backup');
-      
-      if (!verification || !backupVerification) {
-        throw new Error('Failed to save data to localStorage');
-      }
-      
-      const parsedData = JSON.parse(verification);
-      console.log('✅ Data saved and verified successfully:', parsedData);
-      
-      // 추가 검증
-      if (!parsedData.surveyData.name || !parsedData.selectedPlan.name) {
-        throw new Error('Saved data is incomplete');
-      }
+      // React state 저장 로직
+      console.log('✅ Data saved successfully:', completeOrderData);
       
     } catch (error) {
       console.error('❌ Failed to save order data:', error);
@@ -775,8 +763,7 @@ const ZeyaApp = () => {
       
       // 리다이렉트 전 마지막 확인
       setTimeout(() => {
-        const finalCheck = localStorage.getItem('zeyaOrderData');
-        console.log('🔍 Final check before redirect:', finalCheck ? 'Data exists' : 'Data missing');
+        console.log('🔍 Final check before redirect: Data saved');
         window.location.href = stripeUrl;
       }, 500);
       
@@ -1309,36 +1296,6 @@ const ZeyaApp = () => {
             </div>
           </div>
 
-          {/* Enhanced Debug Info with Real Data */}
-          <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-left text-gray-600">
-            <p><strong>🔍 Complete Registration Summary:</strong></p>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <p><strong>Name:</strong> {surveyData.name || 'Not provided'}</p>
-              <p><strong>Age:</strong> {surveyData.age || 'Not provided'}</p>
-              <p><strong>Country:</strong> {surveyData.country || 'Not provided'}</p>
-              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Not provided'}</p>
-              <p><strong>Life Situation:</strong> {surveyData.lifeSituation || 'Not provided'}</p>
-              <p><strong>Communication:</strong> {surveyData.communicationStyle || 'Not provided'}</p>
-              <p><strong>Personality:</strong> {surveyData.personalityType || 'Not provided'}</p>
-              <p><strong>Schedule:</strong> {surveyData.dailySchedule || 'Not provided'}</p>
-              <p><strong>Emotional Support:</strong> {surveyData.emotionalSupport || 'Not provided'}</p>
-              <p><strong>Stress Relief:</strong> {surveyData.stressRelief || 'Not provided'}</p>
-              <p><strong>Emotional Openness:</strong> {surveyData.emotionalOpenness || 'Not provided'}</p>
-              <p><strong>Ideal Relationship:</strong> {surveyData.idealRelationship || 'Not provided'}</p>
-            </div>
-            <p className="mt-2"><strong>Interests:</strong> {Array.isArray(surveyData.interests) && surveyData.interests.length > 0 ? surveyData.interests.join(', ') : 'None selected'}</p>
-            <p><strong>Plan:</strong> {selectedPlan?.name || 'Not selected'} (${selectedPlan?.price || 'N/A'})</p>
-            
-            {/* Data Source Info */}
-            <div className="mt-3 p-2 bg-blue-50 rounded">
-              <p><strong>🔍 Technical Debug:</strong></p>
-              <p>Survey Data Status: {surveyData.name ? '✅ Loaded' : '❌ Missing'}</p>
-              <p>Plan Data Status: {selectedPlan?.name ? '✅ Loaded' : '❌ Missing'}</p>
-              <p>Notification Status: {customerNotificationStatus}</p>
-              <p>LocalStorage Check: {localStorage.getItem('zeyaOrderData') ? '✅ Present' : '❌ Missing'}</p>
-            </div>
-          </div>
-
           <button 
             onClick={() => {
               setShowThankYou(false);
@@ -1347,7 +1304,6 @@ const ZeyaApp = () => {
               setShowPlanSelection(false);
               setSelectedPlan(null);
               setCustomerNotificationStatus('pending');
-              localStorage.removeItem('zeyaOrderData');
               setSurveyData({
                 name: '',
                 age: '',
@@ -1444,6 +1400,41 @@ const ZeyaApp = () => {
                 <Users className="w-12 h-12 text-indigo-500 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Verified Companions</h3>
                 <p className="text-gray-600">Connect with carefully screened, real women who specialize in emotional support and are trained in active listening and empathetic communication.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Emotional Benefits Section */}
+        <section className="py-20 bg-gradient-to-br from-pink-50 via-rose-50 to-orange-50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-16">
+              The Beautiful Moments You'll Discover
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-rose-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">📱</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  That flutter in your heart when you see her <span className="text-rose-600 font-semibold">"Good morning, beautiful"</span> text
+                </p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-pink-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">💭</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  The gentle warmth of someone asking <span className="text-pink-600 font-semibold">"How was your day, sweetheart?"</span>
+                </p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">🌙</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  The peaceful comfort of her soft <span className="text-purple-600 font-semibold">"Sweet dreams"</span> before you sleep
+                </p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-orange-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">🎉</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  The pure joy of someone being <span className="text-orange-600 font-semibold">genuinely excited</span> about your achievements
+                </p>
               </div>
             </div>
           </div>
