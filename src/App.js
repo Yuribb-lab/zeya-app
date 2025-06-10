@@ -392,36 +392,37 @@ const ZeyaApp = () => {
       isPaymentSuccess
     });
     
-    // Always log React state content
-    const savedData = React.useState({})[0];
-    console.log('💾 React state content:', savedData);
+    // Always log localStorage content
+    const savedData = localStorage.getItem('zeyaOrderData');
+    console.log('💾 LocalStorage content:', savedData);
     
     if (isPaymentSuccess) {
       console.log('💳 Payment success detected, restoring data...');
       
       // 저장된 데이터 복원
-      const savedData = React.useState({})[0];
+      const savedData = localStorage.getItem('zeyaOrderData');
       console.log('💾 Raw saved data:', savedData);
       
       if (savedData) {
         try {
-          console.log('📄 Parsed order data:', savedData);
+          const orderData = JSON.parse(savedData);
+          console.log('📄 Parsed order data:', orderData);
           
           // 즉시 상태 업데이트
-          if (savedData.selectedPlan) {
-            setSelectedPlan(savedData.selectedPlan);
-            console.log('✅ Plan restored:', savedData.selectedPlan);
+          if (orderData.selectedPlan) {
+            setSelectedPlan(orderData.selectedPlan);
+            console.log('✅ Plan restored:', orderData.selectedPlan);
           }
           
-          if (savedData.surveyData) {
-            setSurveyData(savedData.surveyData);
-            console.log('✅ Survey data restored:', savedData.surveyData);
+          if (orderData.surveyData) {
+            setSurveyData(orderData.surveyData);
+            console.log('✅ Survey data restored:', orderData.surveyData);
           }
           
           // 텔레그램 알림 전송
           const fullCustomerData = {
-            ...savedData.surveyData,
-            selectedPlan: savedData.selectedPlan
+            ...orderData.surveyData,
+            selectedPlan: orderData.selectedPlan
           };
           
           console.log('📤 Sending notification with full data:', fullCustomerData);
@@ -435,7 +436,7 @@ const ZeyaApp = () => {
           console.error('❌ Error parsing saved data:', error);
         }
       } else {
-        console.log('⚠️ No saved data found in React state');
+        console.log('⚠️ No saved data found in localStorage');
       }
       
       // Thank you 페이지로 이동
@@ -600,9 +601,29 @@ const ZeyaApp = () => {
         setCustomerNotificationStatus('sent');
         console.log('✅ NOTIFICATION SENT SUCCESSFULLY!');
         
+        // 성공 로그를 localStorage에도 저장
+        const notificationLog = {
+          timestamp: new Date().toISOString(),
+          status: 'success',
+          customerName: customerData.name,
+          plan: customerData.selectedPlan?.name,
+          telegramResponse: telegramResult.data
+        };
+        localStorage.setItem('zeya_notification_log', JSON.stringify(notificationLog));
+        
       } else {
         setCustomerNotificationStatus('error');
         console.error('❌ NOTIFICATION FAILED:', telegramResult.error);
+        
+        // 실패 로그 저장
+        const errorLog = {
+          timestamp: new Date().toISOString(),
+          status: 'failed',
+          customerName: customerData.name,
+          error: telegramResult.error,
+          retryRecommended: true
+        };
+        localStorage.setItem('zeya_notification_error', JSON.stringify(errorLog));
         
         // 자동 재시도 (1회)
         console.log('🔄 Attempting automatic retry...');
@@ -739,10 +760,37 @@ const ZeyaApp = () => {
     
     console.log('📦 Complete order data to save:', completeOrderData);
     
-    // React state에 저장 (localStorage 대신)
+    // localStorage에 여러 방식으로 저장 (백업)
     try {
-      // React state 저장 로직
-      console.log('✅ Data saved successfully:', completeOrderData);
+      // 기존 데이터 완전 삭제
+      localStorage.removeItem('zeyaOrderData');
+      localStorage.removeItem('zeya_backup');
+      localStorage.removeItem('zeya_survey');
+      localStorage.removeItem('zeya_plan');
+      
+      // 메인 저장
+      localStorage.setItem('zeyaOrderData', JSON.stringify(completeOrderData));
+      
+      // 백업 저장 (여러 키로)
+      localStorage.setItem('zeya_backup', JSON.stringify(completeOrderData));
+      localStorage.setItem('zeya_survey', JSON.stringify(surveyData));
+      localStorage.setItem('zeya_plan', JSON.stringify(selectedPlanData));
+      
+      // 즉시 검증
+      const verification = localStorage.getItem('zeyaOrderData');
+      const backupVerification = localStorage.getItem('zeya_backup');
+      
+      if (!verification || !backupVerification) {
+        throw new Error('Failed to save data to localStorage');
+      }
+      
+      const parsedData = JSON.parse(verification);
+      console.log('✅ Data saved and verified successfully:', parsedData);
+      
+      // 추가 검증
+      if (!parsedData.surveyData.name || !parsedData.selectedPlan.name) {
+        throw new Error('Saved data is incomplete');
+      }
       
     } catch (error) {
       console.error('❌ Failed to save order data:', error);
@@ -763,7 +811,8 @@ const ZeyaApp = () => {
       
       // 리다이렉트 전 마지막 확인
       setTimeout(() => {
-        console.log('🔍 Final check before redirect: Data saved');
+        const finalCheck = localStorage.getItem('zeyaOrderData');
+        console.log('🔍 Final check before redirect:', finalCheck ? 'Data exists' : 'Data missing');
         window.location.href = stripeUrl;
       }, 500);
       
@@ -1296,6 +1345,36 @@ const ZeyaApp = () => {
             </div>
           </div>
 
+          {/* Enhanced Debug Info with Real Data */}
+          <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-gray-200 text-xs text-left text-gray-600">
+            <p><strong>🔍 Complete Registration Summary:</strong></p>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <p><strong>Name:</strong> {surveyData.name || 'Not provided'}</p>
+              <p><strong>Age:</strong> {surveyData.age || 'Not provided'}</p>
+              <p><strong>Country:</strong> {surveyData.country || 'Not provided'}</p>
+              <p><strong>Telegram:</strong> {surveyData.telegramUsername || 'Not provided'}</p>
+              <p><strong>Life Situation:</strong> {surveyData.lifeSituation || 'Not provided'}</p>
+              <p><strong>Communication:</strong> {surveyData.communicationStyle || 'Not provided'}</p>
+              <p><strong>Personality:</strong> {surveyData.personalityType || 'Not provided'}</p>
+              <p><strong>Schedule:</strong> {surveyData.dailySchedule || 'Not provided'}</p>
+              <p><strong>Emotional Support:</strong> {surveyData.emotionalSupport || 'Not provided'}</p>
+              <p><strong>Stress Relief:</strong> {surveyData.stressRelief || 'Not provided'}</p>
+              <p><strong>Emotional Openness:</strong> {surveyData.emotionalOpenness || 'Not provided'}</p>
+              <p><strong>Ideal Relationship:</strong> {surveyData.idealRelationship || 'Not provided'}</p>
+            </div>
+            <p className="mt-2"><strong>Interests:</strong> {Array.isArray(surveyData.interests) && surveyData.interests.length > 0 ? surveyData.interests.join(', ') : 'None selected'}</p>
+            <p><strong>Plan:</strong> {selectedPlan?.name || 'Not selected'} (${selectedPlan?.price || 'N/A'})</p>
+            
+            {/* Data Source Info */}
+            <div className="mt-3 p-2 bg-blue-50 rounded">
+              <p><strong>🔍 Technical Debug:</strong></p>
+              <p>Survey Data Status: {surveyData.name ? '✅ Loaded' : '❌ Missing'}</p>
+              <p>Plan Data Status: {selectedPlan?.name ? '✅ Loaded' : '❌ Missing'}</p>
+              <p>Notification Status: {customerNotificationStatus}</p>
+              <p>LocalStorage Check: {localStorage.getItem('zeyaOrderData') ? '✅ Present' : '❌ Missing'}</p>
+            </div>
+          </div>
+
           <button 
             onClick={() => {
               setShowThankYou(false);
@@ -1304,6 +1383,7 @@ const ZeyaApp = () => {
               setShowPlanSelection(false);
               setSelectedPlan(null);
               setCustomerNotificationStatus('pending');
+              localStorage.removeItem('zeyaOrderData');
               setSurveyData({
                 name: '',
                 age: '',
