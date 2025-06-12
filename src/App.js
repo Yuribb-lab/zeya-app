@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle, Mail } from 'lucide-react';
 
 // 🤖 Telegram Bot Configuration
 const TELEGRAM_CONFIG = {
   botToken: '7948996488:AAG_5aMk6_OFg22QM411BdZ54TUPzJqvnxA',
   chatId: 6447858148
+};
+
+// 📧 EmailJS Configuration
+const EMAILJS_CONFIG = {
+  serviceId: 'service_yhia21c',
+  templateId: 'template_btrf5at',
+  publicKey: 'tm5FWkK5QT0tMftOh'
 };
 
 // 🚀 Stripe Payment Links for zeyalove.com (LIVE MODE)
@@ -345,6 +352,7 @@ const ZeyaApp = () => {
     name: '',
     age: '',
     country: '',
+    email: '',
     telegramUsername: '',
     lifeSituation: '',
     communicationStyle: '',
@@ -430,7 +438,7 @@ const ZeyaApp = () => {
           // 즉시 알림 처리
           setTimeout(() => {
             processCustomerNotification(fullCustomerData);
-          }, 5000);
+          }, 1000);
           
         } catch (error) {
           console.error('❌ Error parsing saved data:', error);
@@ -450,7 +458,7 @@ const ZeyaApp = () => {
     }
   }, []);
 
-   const plans = [
+  const plans = [
     {
       name: 'Sweet Beginning',
       price: 149,
@@ -517,10 +525,6 @@ const ZeyaApp = () => {
   // 🤖 Enhanced Telegram notification with better error handling
   const sendTelegramNotification = async (customerData) => {
     try {
-        if (!customerData || !customerData.name || !customerData.selectedPlan?.name) {
-            console.error('❌ Critical data missing for Telegram notification');
-            return { success: false, error: 'Missing required customer data' };
-        }
       console.log('📤 Starting Telegram notification...');
       console.log('Customer Data for notification:', customerData);
       
@@ -589,6 +593,35 @@ const ZeyaApp = () => {
     }
   };
 
+  // 📧 Send Welcome Email using EmailJS
+  const sendWelcomeEmail = async (customerData) => {
+    try {
+      const emailjs = await import('https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js');
+      emailjs.default.init(EMAILJS_CONFIG.publicKey);
+
+      const emailParams = {
+        to_email: customerData.email,
+        customer_name: customerData.name,
+        selected_plan: customerData.selectedPlan?.name,
+        plan_price: customerData.selectedPlan?.price,
+        telegram_username: customerData.telegramUsername,
+        country: customerData.country,
+        registration_time: new Date().toLocaleString('en-US')
+      };
+
+      const response = await emailjs.default.send(
+        EMAILJS_CONFIG.serviceId,
+        EMAILJS_CONFIG.templateId,
+        emailParams
+      );
+
+      return { success: true, response };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+
   // Process customer notifications with enhanced reliability
   const processCustomerNotification = async (customerData) => {
     console.log('🔔 STARTING NOTIFICATION PROCESS...');
@@ -598,6 +631,8 @@ const ZeyaApp = () => {
     try {
       console.log('⏳ Sending Telegram notification...');
       const telegramResult = await sendTelegramNotification(customerData);
+      const emailResult = await sendWelcomeEmail(customerData);
+
       
       console.log('📨 Telegram result:', telegramResult);
       
@@ -630,25 +665,16 @@ const ZeyaApp = () => {
         localStorage.setItem('zeya_notification_error', JSON.stringify(errorLog));
         
         // 자동 재시도 (1회)
+        console.log('🔄 Attempting automatic retry...');
         setTimeout(async () => {
-    const retryResult = await sendTelegramNotification(customerData);
-    if (retryResult.success) {
-        setCustomerNotificationStatus('sent');
-        console.log('✅ RETRY SUCCESSFUL!');
-    } else {
-        console.error('❌ RETRY ALSO FAILED - Attempting final retry...');
-        // 최종 재시도
-        setTimeout(async () => {
-            const finalRetry = await sendTelegramNotification(customerData);
-            if (finalRetry.success) {
-                setCustomerNotificationStatus('sent');
-                console.log('✅ FINAL RETRY SUCCESSFUL!');
-            } else {
-                console.error('💀 ALL RETRIES FAILED');
-            }
-        }, 10000); // 10초 후 최종 시도
-    }
-}, 5000); // 5초 후 첫 번째 재시도
+          const retryResult = await sendTelegramNotification(customerData);
+          if (retryResult.success) {
+            setCustomerNotificationStatus('sent');
+            console.log('✅ RETRY SUCCESSFUL!');
+          } else {
+            console.error('❌ RETRY ALSO FAILED');
+          }
+        }, 3000);
       }
     } catch (error) {
       setCustomerNotificationStatus('error');
@@ -882,6 +908,19 @@ const ZeyaApp = () => {
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-3 border border-rose-200 rounded-xl focus:ring-2 focus:ring-rose-300 bg-white/70"
+                    value={surveyData.email}
+                    onChange={(e) => setSurveyData({...surveyData, email: e.target.value})}
+                    required
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Country/Region *</label>
                   <select 
@@ -1493,6 +1532,41 @@ const ZeyaApp = () => {
                 <Users className="w-12 h-12 text-indigo-500 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Verified Companions</h3>
                 <p className="text-gray-600">Connect with carefully screened, real women who specialize in emotional support and are trained in active listening and empathetic communication.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Emotional Benefits Section */}
+        <section className="py-20 bg-gradient-to-br from-pink-50 via-rose-50 to-orange-50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600 mb-16">
+              The Beautiful Moments You'll Discover
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-rose-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">📱</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  That flutter in your heart when you see her <span className="text-rose-600 font-semibold">"Good morning, beautiful"</span> text
+                </p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-pink-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">💭</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  The gentle warmth of someone asking <span className="text-pink-600 font-semibold">"How was your day, sweetheart?"</span>
+                </p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">🌙</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  The peaceful comfort of her soft <span className="text-purple-600 font-semibold">"Sweet dreams"</span> before you sleep
+                </p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-orange-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-6xl mb-6">🎉</div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  The pure joy of someone being <span className="text-orange-600 font-semibold">genuinely excited</span> about your achievements
+                </p>
               </div>
             </div>
           </div>

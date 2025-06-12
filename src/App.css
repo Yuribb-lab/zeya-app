@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Heart, MessageCircle, Sparkles, Shield, Users, AlertTriangle, Mail } from 'lucide-react';
 
 // 🤖 Telegram Bot Configuration
 const TELEGRAM_CONFIG = {
   botToken: '7948996488:AAG_5aMk6_OFg22QM411BdZ54TUPzJqvnxA',
   chatId: 6447858148
+};
+
+// 📧 EmailJS Configuration
+const EMAILJS_CONFIG = {
+  serviceId: 'service_yhia21c',
+  templateId: 'template_btrf5at',
+  publicKey: 'tm5FWkK5QT0tMftOh'
 };
 
 // 🚀 Stripe Payment Links for zeyalove.com (LIVE MODE)
@@ -345,6 +352,7 @@ const ZeyaApp = () => {
     name: '',
     age: '',
     country: '',
+    email: '',
     telegramUsername: '',
     lifeSituation: '',
     communicationStyle: '',
@@ -585,6 +593,35 @@ const ZeyaApp = () => {
     }
   };
 
+  // 📧 Send Welcome Email using EmailJS
+  const sendWelcomeEmail = async (customerData) => {
+    try {
+      const emailjs = await import('https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js');
+      emailjs.default.init(EMAILJS_CONFIG.publicKey);
+
+      const emailParams = {
+        to_email: customerData.email,
+        customer_name: customerData.name,
+        selected_plan: customerData.selectedPlan?.name,
+        plan_price: customerData.selectedPlan?.price,
+        telegram_username: customerData.telegramUsername,
+        country: customerData.country,
+        registration_time: new Date().toLocaleString('en-US')
+      };
+
+      const response = await emailjs.default.send(
+        EMAILJS_CONFIG.serviceId,
+        EMAILJS_CONFIG.templateId,
+        emailParams
+      );
+
+      return { success: true, response };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+
   // Process customer notifications with enhanced reliability
   const processCustomerNotification = async (customerData) => {
     console.log('🔔 STARTING NOTIFICATION PROCESS...');
@@ -594,6 +631,8 @@ const ZeyaApp = () => {
     try {
       console.log('⏳ Sending Telegram notification...');
       const telegramResult = await sendTelegramNotification(customerData);
+      const emailResult = await sendWelcomeEmail(customerData);
+
       
       console.log('📨 Telegram result:', telegramResult);
       
@@ -869,6 +908,19 @@ const ZeyaApp = () => {
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-3 border border-rose-200 rounded-xl focus:ring-2 focus:ring-rose-300 bg-white/70"
+                    value={surveyData.email}
+                    onChange={(e) => setSurveyData({...surveyData, email: e.target.value})}
+                    required
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Country/Region *</label>
                   <select 
