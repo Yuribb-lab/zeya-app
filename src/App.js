@@ -595,32 +595,31 @@ const ZeyaApp = () => {
 
   // 📧 Send Welcome Email using EmailJS
   const sendWelcomeEmail = async (customerData) => {
-    try {
-      const emailjs = await import('https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js');
-      emailjs.default.init(EMAILJS_CONFIG.publicKey);
+  try {
+    const emailjs = await import('https://cdn.emailjs.com/npm/@emailjs/browser@3/dist/email.min.js');
+    emailjs.default.init(EMAILJS_CONFIG.publicKey);
 
-      const emailParams = {
-        to_email: customerData.email,
-        customer_name: customerData.name,
-        selected_plan: customerData.selectedPlan?.name,
-        plan_price: customerData.selectedPlan?.price,
-        telegram_username: customerData.telegramUsername,
-        country: customerData.country,
-        registration_time: new Date().toLocaleString('en-US')
-      };
+    const emailParams = {
+      to_email: customerData.email,
+      customer_name: customerData.name,
+      selected_plan: customerData.selectedPlan?.name,
+      plan_price: customerData.selectedPlan?.price,
+      telegram_username: customerData.telegramUsername,
+      country: customerData.country,
+      registration_time: new Date().toLocaleString('en-US')
+    };
 
-      const response = await emailjs.default.send(
-        EMAILJS_CONFIG.serviceId,
-        EMAILJS_CONFIG.templateId,
-        emailParams
-      );
+    const response = await emailjs.default.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.templateId,
+      emailParams
+    );
 
-      return { success: true, response };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
-
+    return { success: true, response };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
 
   // Process customer notifications with enhanced reliability
   const processCustomerNotification = async (customerData) => {
